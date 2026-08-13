@@ -1,0 +1,17 @@
+model EmergencyAssistance {
+  id               String        @id @default(uuid())
+  latitude         Float
+  longitude        Float
+  issueDescription String
+  status           RequestStatus @default(PENDING)
+  requestedAt      DateTime      @default(now())
+
+  // Relations
+  customerId String
+  customer   User             @relation("CustomerEmergencies", fields: [customerId], references: [id])
+  centerId   String
+  center     AutomotiveCenter @relation(fields: [centerId], references: [id])
+  mechanicId String?
+  mechanic   User?            @relation("MechanicEmergencies", fields: [mechanicId], references: [id])
+  payment    Payment?
+}

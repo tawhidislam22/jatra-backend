@@ -1,0 +1,21 @@
+model AutomotiveCenter {
+  id        String @id @default(uuid())
+  name      String
+  address   String
+  latitude        Float
+  longitude       Float
+  phone           String?
+  rating          Float    @default(0)
+  isApproved      Boolean  @default(false)
+  servicesOffered String[]
+  adminId         String   @unique
+
+  // Relations
+  admin     User   @relation("CenterAdmin", fields: [adminId], references: [id])
+  mechanics User[] @relation("CenterMechanics") // Roster of hired mechanics
+
+  rentalFleet       Vehicle[]             @relation("CenterFleet")
+  serviceRequests   ServiceRequest[]
+  emergencyRequests EmergencyAssistance[]
+  reviews           Review[]
+}

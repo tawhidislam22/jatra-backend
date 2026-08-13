@@ -1,0 +1,21 @@
+model Payment {
+  id            String        @id @default(uuid())
+  amount        Float
+  status        PaymentStatus @default(PENDING)
+  transactionId String?       @unique
+  paidAt        DateTime?
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // A payment can belong to one of these three services
+  rentalBookingId String?        @unique
+  rentalBooking   RentalBooking? @relation(fields: [rentalBookingId], references: [id])
+
+  serviceRequestId String?         @unique
+  serviceRequest   ServiceRequest? @relation(fields: [serviceRequestId], references: [id])
+
+  emergencyId      String?              @unique
+  emergencyRequest EmergencyAssistance? @relation(fields: [emergencyId], references: [id])
+}

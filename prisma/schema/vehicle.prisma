@@ -1,0 +1,23 @@
+model Vehicle {
+  id           String      @id @default(uuid())
+  make         String
+  model        String
+  year         Int
+  licensePlate String      @unique
+  type         VehicleType
+  pricePerDay  Float?
+  isAvailable  Boolean     @default(true)
+  features     String[]
+  images       String[]
+
+  // Relations for Customer Owned
+  ownerId String?
+  owner   User?   @relation("CustomerVehicles", fields: [ownerId], references: [id])
+
+  // Relations for Center Fleet
+  centerId String?
+  center   AutomotiveCenter? @relation("CenterFleet", fields: [centerId], references: [id])
+
+  rentalBookings  RentalBooking[]
+  serviceRequests ServiceRequest[]
+}

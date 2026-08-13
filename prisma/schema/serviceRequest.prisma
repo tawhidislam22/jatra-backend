@@ -1,0 +1,19 @@
+model ServiceRequest {
+  id               String        @id @default(uuid())
+  serviceType      ServiceType
+  scheduledDate    DateTime
+  issueDescription String
+  status           RequestStatus @default(PENDING)
+
+  // Relations
+  customerId String
+  customer   User             @relation("CustomerServices", fields: [customerId], references: [id])
+  vehicleId  String
+  vehicle    Vehicle          @relation(fields: [vehicleId], references: [id])
+  centerId   String
+  center     AutomotiveCenter @relation(fields: [centerId], references: [id])
+  mechanicId String?
+  mechanic   User?            @relation("MechanicServices", fields: [mechanicId], references: [id])
+  payment    Payment?
+  review     Review?
+}

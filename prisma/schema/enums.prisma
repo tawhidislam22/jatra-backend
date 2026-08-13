@@ -1,0 +1,35 @@
+enum Role {
+  CUSTOMER
+  ADMIN
+  MECHANIC
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum VehicleType {
+  RENTAL_FLEET
+  CUSTOMER_OWNED
+}
+
+enum ServiceType {
+  WORKSHOP
+  DOORSTEP
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}

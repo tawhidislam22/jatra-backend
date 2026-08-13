@@ -1,0 +1,680 @@
+{
+  "info": {
+    "name": "Jatra - Smart Vehicle Rental & Service Platform",
+    "description": "API collection for testing Jatra endpoints locally.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"Password123!\",\n  \"fullName\": \"John Doe\",\n  \"phone\": \"+1234567890\",\n  \"role\": \"CUSTOMER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set(\"token\", jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-email",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify-email"]
+            }
+          }
+        },
+        {
+          "name": "Resend OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/resend-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "resend-otp"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh-token"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "Forget Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forget-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forget-password"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            }
+          }
+        },
+        {
+          "name": "Logout User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Google Login",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login/google",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login", "google"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Automotive Center",
+      "item": [
+        {
+          "name": "Register Center",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Downtown Auto Care\",\n  \"address\": \"123 Main St, City\",\n  \"latitude\": 40.7128,\n  \"longitude\": -74.0060\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/automotive-centers",
+              "host": ["{{baseUrl}}"],
+              "path": ["automotive-centers"]
+            }
+          }
+        },
+        {
+          "name": "Get All Centers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/automotive-centers",
+              "host": ["{{baseUrl}}"],
+              "path": ["automotive-centers"]
+            }
+          }
+        },
+        {
+          "name": "Add Mechanic",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mechanicId\": \"<MECHANIC_USER_ID>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/automotive-centers/<CENTER_ID>/mechanics",
+              "host": ["{{baseUrl}}"],
+              "path": ["automotive-centers", "<CENTER_ID>", "mechanics"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehicles",
+      "item": [
+        {
+          "name": "Register Vehicle (Customer Owned)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"make\": \"Toyota\",\n  \"model\": \"Camry\",\n  \"year\": 2020,\n  \"licensePlate\": \"ABC-1234\",\n  \"type\": \"CUSTOMER_OWNED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles"]
+            }
+          }
+        },
+        {
+          "name": "Register Vehicle (Rental Fleet)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"make\": \"Honda\",\n  \"model\": \"Civic\",\n  \"year\": 2022,\n  \"licensePlate\": \"XYZ-9876\",\n  \"type\": \"RENTAL_FLEET\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles"]
+            }
+          }
+        },
+        {
+          "name": "Get All Vehicles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles"]
+            }
+          }
+        },
+        {
+          "name": "Get My Vehicles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles/my-vehicles",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles", "my-vehicles"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rental Bookings",
+      "item": [
+        {
+          "name": "Create Rental Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicleId\": \"<VEHICLE_ID>\",\n  \"pickupDate\": \"2024-10-10T10:00:00Z\",\n  \"returnDate\": \"2024-10-15T10:00:00Z\",\n  \"totalAmount\": 150.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rental-bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["rental-bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get Rental Bookings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rental-bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["rental-bookings"]
+            }
+          }
+        },
+        {
+          "name": "Update Booking Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACCEPTED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rental-bookings/<BOOKING_ID>/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["rental-bookings", "<BOOKING_ID>", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Service Requests",
+      "item": [
+        {
+          "name": "Create Service Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceType\": \"WORKSHOP\",\n  \"scheduledDate\": \"2024-09-20T14:00:00Z\",\n  \"issueDescription\": \"Oil change and brake inspection\",\n  \"vehicleId\": \"<VEHICLE_ID>\",\n  \"centerId\": \"<CENTER_ID>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/service-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-requests"]
+            }
+          }
+        },
+        {
+          "name": "Get Service Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/service-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-requests"]
+            }
+          }
+        },
+        {
+          "name": "Assign Mechanic to Service",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mechanicId\": \"<MECHANIC_ID>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/service-requests/<SERVICE_ID>/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["service-requests", "<SERVICE_ID>", "assign"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Emergency Assistance",
+      "item": [
+        {
+          "name": "Request Emergency",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 40.7128,\n  \"longitude\": -74.0060,\n  \"issueDescription\": \"Car broke down on the highway\",\n  \"centerId\": \"<CENTER_ID>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/emergencies",
+              "host": ["{{baseUrl}}"],
+              "path": ["emergencies"]
+            }
+          }
+        },
+        {
+          "name": "Get Emergencies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/emergencies",
+              "host": ["{{baseUrl}}"],
+              "path": ["emergencies"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Checkout Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50.00,\n  \"serviceRequestId\": \"<SERVICE_ID>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/create-checkout-session",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "create-checkout-session"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "history"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Great service!\",\n  \"centerId\": \"<CENTER_ID>\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews"]
+            }
+          }
+        },
+        {
+          "name": "Get Center Reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/center/<CENTER_ID>",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews", "center", "<CENTER_ID>"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

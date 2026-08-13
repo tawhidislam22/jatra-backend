@@ -1,0 +1,20 @@
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int // e.g., 1 to 5
+  comment   String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  customerId String
+  customer   User   @relation(fields: [customerId], references: [id])
+
+  centerId String
+  center   AutomotiveCenter @relation(fields: [centerId], references: [id])
+
+  // Optional: Link the review directly to a specific booking or service
+  rentalBookingId String?        @unique
+  rentalBooking   RentalBooking? @relation(fields: [rentalBookingId], references: [id])
+
+  serviceRequestId String?         @unique
+  serviceRequest   ServiceRequest? @relation(fields: [serviceRequestId], references: [id])
+}

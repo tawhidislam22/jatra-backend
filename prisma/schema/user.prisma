@@ -1,0 +1,38 @@
+model User {
+  id                 String     @id @default(uuid())
+  email              String     @unique
+  name               String
+  fullName           String?
+  phone              String?
+  role               Role       @default(CUSTOMER)
+  status             UserStatus @default(ACTIVE)
+  emailVerified      Boolean    @default(false)
+  needPasswordChange Boolean    @default(false)
+  isDeleted          Boolean    @default(false)
+  deletedAt          DateTime?
+  image              String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // better-auth Relations
+  sessions Session[]
+  accounts Account[]
+
+  // Vehicle System Relations
+  ownedVehicles       Vehicle[]             @relation("CustomerVehicles")
+  rentalBookings      RentalBooking[]
+  serviceRequests     ServiceRequest[]      @relation("CustomerServices")
+  assignedServices    ServiceRequest[]      @relation("MechanicServices")
+  emergencyRequests   EmergencyAssistance[] @relation("CustomerEmergencies")
+  assignedEmergencies EmergencyAssistance[] @relation("MechanicEmergencies")
+  payments            Payment[]
+  reviews             Review[]
+
+  // Center Management & Employment
+  managedCenter AutomotiveCenter? @relation("CenterAdmin")
+
+  employedAtCenterId String?
+  employedAtCenter   AutomotiveCenter? @relation("CenterMechanics", fields: [employedAtCenterId], references: [id])
+
+  @@map("user")
+}
