@@ -8,6 +8,7 @@ model AutomotiveCenter {
   rating          Float    @default(0)
   isApproved      Boolean  @default(false)
   servicesOffered String[]
+  images          String[]
   adminId         String   @unique
 
   // Relations

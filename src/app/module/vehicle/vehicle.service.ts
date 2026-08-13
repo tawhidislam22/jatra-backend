@@ -68,9 +68,21 @@ const updateVehicle = async (id: string, user: any, payload: IUpdateVehicleReque
     });
 };
 
+const getVehicleById = async (id: string) => {
+    const vehicle = await prisma.vehicle.findUnique({
+        where: { id },
+        include: { center: true, owner: true }
+    });
+    if (!vehicle) {
+        throw new AppError(status.NOT_FOUND, "Vehicle not found");
+    }
+    return vehicle;
+};
+
 export const VehicleService = {
     registerVehicle,
     getAllVehicles,
     getMyVehicles,
-    updateVehicle
+    updateVehicle,
+    getVehicleById
 };

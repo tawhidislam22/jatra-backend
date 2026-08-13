@@ -21,6 +21,9 @@ router.get('/', VehicleController.getAllVehicles);
 // Get my vehicles (Logged in user)
 router.get('/my-vehicles', checkAuth(Role.CUSTOMER, Role.ADMIN, Role.MECHANIC), VehicleController.getMyVehicles);
 
+// Get vehicle by id
+router.get('/:id', VehicleController.getVehicleById);
+
 // Update vehicle
 router.patch(
     '/:id', 
