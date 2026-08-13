@@ -102,6 +102,16 @@ export const globalErrorHandler = async (err: any, req: Request, res: Response, 
                 message: err.message
             }
         ]
+    } else if (err.name === 'APIError' && err.statusCode) {
+        statusCode = err.statusCode;
+        message = err.message;
+        stack = err.stack;
+        errorSources = [
+            {
+                path: '',
+                message: err.message
+            }
+        ]
     }
     else if (err instanceof Error) {
         statusCode = status.INTERNAL_SERVER_ERROR;

@@ -384,7 +384,8 @@ const resetPassword=async(email:string,otp:string,newPassword:string)=>{
         }
     })
 
-
+    const loginResult = await loginUser({ email, password: newPassword });
+    return loginResult;
 }
 
 const googleLoginSuccess=async(session:Record<string, any>)=>{
