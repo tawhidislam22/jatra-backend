@@ -232,7 +232,8 @@ TInclude = Record<string, unknown>
     }
 
     sort () : this {
-        const sortBy = this.queryParams.sortBy || 'createdAt';
+        const defaultSort = this.config.defaultSortBy || 'id';
+        const sortBy = this.queryParams.sortBy || defaultSort;
         const sortOrder = this.queryParams.sortOrder === 'asc' ? 'asc' : 'desc';
 
         this.sortBy = sortBy;

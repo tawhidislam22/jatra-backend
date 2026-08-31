@@ -22,4 +22,10 @@ router.get(
     PaymentController.getPaymentHistory
 );
 
+// Verify payment status (fallback for missing webhook)
+router.get(
+    '/verify',
+    PaymentController.verifyPayment
+);
+
 export const PaymentRoutes = router;

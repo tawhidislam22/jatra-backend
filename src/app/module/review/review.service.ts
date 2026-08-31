@@ -27,7 +27,16 @@ const getCenterReviews = async (centerId: string) => {
     });
 };
 
+const getMyReviews = async (userId: string) => {
+    return await prisma.review.findMany({
+        where: { customerId: userId },
+        include: { center: true, rentalBooking: { include: { vehicle: true } } },
+        orderBy: { createdAt: 'desc' }
+    });
+};
+
 export const ReviewService = {
     createReview,
-    getCenterReviews
+    getCenterReviews,
+    getMyReviews
 };

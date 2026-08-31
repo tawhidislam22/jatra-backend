@@ -17,13 +17,14 @@ const createCenter = catchAsync(async (req: Request | any, res: Response) => {
 });
 
 const getAllCenters = catchAsync(async (req: Request, res: Response) => {
-    const result = await AutomotiveCenterService.getAllCenters();
+    const result = await AutomotiveCenterService.getAllCenters(req.query);
 
     sendResponse(res, {
         httpStatusCode: status.OK,
         success: true,
         message: "Automotive Centers retrieved successfully",
-        data: result
+        data: result.data,
+        meta: result.meta
     });
 });
 

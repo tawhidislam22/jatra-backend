@@ -31,17 +31,21 @@ const registerVehicle = async (user: any, payload: IRegisterVehicleRequest) => {
     });
 };
 
-const getAllVehicles = async (query: IVehicleFilterQuery) => {
-    // Support filtering by type (e.g. RENTAL_FLEET) or centerId
-    const { type, centerId } = query;
-    const filter: any = {};
-    if (type) filter.type = type;
-    if (centerId) filter.centerId = centerId;
+import { QueryBuilder } from "../../utils/QueryBuilder";
 
-    return await prisma.vehicle.findMany({
-        where: filter,
-        include: { center: true, owner: true }
-    });
+const getAllVehicles = async (query: any) => {
+    const vehicleQuery = new QueryBuilder(prisma.vehicle as any, query, {
+        searchableFields: ['make', 'model', 'licensePlate'],
+        filterableFields: ['type', 'centerId', 'pricePerDay', 'year']
+    })
+        .search()
+        .filter()
+        .sort()
+        .paginate()
+        .fields()
+        .include({ center: true, owner: true });
+
+    return await vehicleQuery.execute();
 };
 
 const getMyVehicles = async (userId: string) => {

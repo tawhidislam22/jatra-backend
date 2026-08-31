@@ -33,8 +33,21 @@ const getPaymentHistory = catchAsync(async (req: Request | any, res: Response) =
     });
 });
 
+const verifyPayment = catchAsync(async (req: Request, res: Response) => {
+    const sessionId = req.query.session_id as string;
+    const result = await PaymentService.verifyPayment(sessionId);
+
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: result.success,
+        message: result.message,
+        data: result
+    });
+});
+
 export const PaymentController = {
     createCheckoutSession,
     handleStripeWebhookEvent,
-    getPaymentHistory
+    getPaymentHistory,
+    verifyPayment
 };

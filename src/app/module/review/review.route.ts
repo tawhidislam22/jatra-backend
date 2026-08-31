@@ -21,4 +21,11 @@ router.get(
     ReviewController.getCenterReviews
 );
 
+// Get my reviews
+router.get(
+    '/my-reviews',
+    checkAuth(Role.CUSTOMER, Role.ADMIN, Role.MECHANIC),
+    ReviewController.getMyReviews
+);
+
 export const ReviewRoutes = router;

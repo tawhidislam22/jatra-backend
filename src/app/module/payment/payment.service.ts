@@ -11,6 +11,11 @@ const stripe = new Stripe(envVars.STRIPE.STRIPE_SECRET_KEY as string, {
 });
 
 const createCheckoutSession = async (userId: string, payload: ICreateCheckoutSessionRequest) => {
+    const metadata: Record<string, string> = { userId };
+    if (payload.serviceRequestId) metadata.serviceRequestId = String(payload.serviceRequestId);
+    if (payload.rentalBookingId) metadata.rentalBookingId = String(payload.rentalBookingId);
+    if (payload.emergencyId) metadata.emergencyId = String(payload.emergencyId);
+
     // Basic setup for Stripe session
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
@@ -29,18 +34,13 @@ const createCheckoutSession = async (userId: string, payload: ICreateCheckoutSes
         mode: "payment",
         success_url: `${envVars.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${envVars.FRONTEND_URL}/payment/cancel`,
-        metadata: {
-            userId,
-            serviceRequestId: payload.serviceRequestId || null,
-            rentalBookingId: payload.rentalBookingId || null,
-            emergencyId: payload.emergencyId || null,
-        }
+        metadata,
     });
 
     // Create pending payment record
     await prisma.payment.create({
         data: {
-            customerId: userId,
+            userId: userId,
             serviceRequestId: payload.serviceRequestId,
             rentalBookingId: payload.rentalBookingId,
             emergencyId: payload.emergencyId,
@@ -64,23 +64,101 @@ const handleStripeWebhookEvent = async (payload: any, sig: string) => {
 
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object as Stripe.Checkout.Session;
-
-        await prisma.payment.updateMany({
-            where: { transactionId: session.id },
-            data: { status: PaymentStatus.SUCCESS }
-        });
+        await fulfillCheckoutSession(session.id);
     }
+};
+
+const fulfillCheckoutSession = async (sessionId: string) => {
+    // Check if it's already fulfilled
+    const existing = await prisma.payment.findUnique({
+        where: { transactionId: sessionId }
+    });
+    if (existing?.status === PaymentStatus.SUCCESS) return; // Already processed
+
+    await prisma.payment.updateMany({
+        where: { transactionId: sessionId },
+        data: { status: PaymentStatus.SUCCESS, paidAt: new Date() }
+    });
+
+    const payment = await prisma.payment.findUnique({
+        where: { transactionId: sessionId },
+        include: { user: true }
+    });
+
+    if (payment) {
+        // Update Rental Booking if applicable
+        if (payment.rentalBookingId) {
+            await prisma.rentalBooking.update({
+                where: { id: payment.rentalBookingId },
+                data: { status: 'ACCEPTED' as any }
+            });
+        }
+        // Update Service Request if applicable
+        if (payment.serviceRequestId) {
+            await prisma.serviceRequest.update({
+                where: { id: payment.serviceRequestId },
+                data: { status: 'ACCEPTED' as any }
+            });
+        }
+
+        // Send Invoice Email (swallow error so it doesn't crash the fulfillment if SMTP is misconfigured)
+        try {
+            const { sendEmail } = await import("../../utils/email");
+            const { generateInvoicePdf } = await import("../../utils/pdfGenerator");
+            const invoiceNumber = `INV-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+            
+            const templateData = {
+                customerName: payment.user.name,
+                invoiceId: invoiceNumber,
+                transactionId: payment.transactionId,
+                paymentDate: new Date().toLocaleDateString(),
+                serviceName: payment.rentalBookingId ? "Vehicle Rental" : (payment.serviceRequestId ? "Automotive Service" : "Emergency Assistance"),
+                bookingDate: new Date().toLocaleDateString(),
+                amount: payment.amount,
+                invoiceUrl: ""
+            };
+
+            const pdfBuffer = await generateInvoicePdf(templateData);
+
+            await sendEmail({
+                to: payment.user.email,
+                subject: `Payment Receipt & Invoice ${invoiceNumber}`,
+                templateName: "invoice",
+                templateData,
+                attachments: [
+                    {
+                        filename: `Invoice_${invoiceNumber}.pdf`,
+                        content: pdfBuffer,
+                        contentType: 'application/pdf'
+                    }
+                ]
+            });
+        } catch (error) {
+            console.error("Failed to send invoice email during fulfillment:", error);
+        }
+    }
+};
+
+const verifyPayment = async (sessionId: string) => {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status === 'paid') {
+        await fulfillCheckoutSession(sessionId);
+        return { success: true, message: "Payment verified and fulfilled" };
+    }
+    return { success: false, message: "Payment not completed" };
 };
 
 const getPaymentHistory = async (userId: string) => {
     return await prisma.payment.findMany({
-        where: { customerId: userId },
-        orderBy: { createdAt: 'desc' }
+        where: { userId },
+        // Payment model doesn't have createdAt, so we remove the orderBy or order by id or paidAt
+        orderBy: { paidAt: 'desc' }
     });
 };
 
 export const PaymentService = {
     createCheckoutSession,
     handleStripeWebhookEvent,
-    getPaymentHistory
+    getPaymentHistory,
+    verifyPayment
 };

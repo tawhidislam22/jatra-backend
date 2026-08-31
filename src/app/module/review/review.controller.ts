@@ -22,12 +22,25 @@ const getCenterReviews = catchAsync(async (req: Request, res: Response) => {
     sendResponse(res, {
         httpStatusCode: status.OK,
         success: true,
-        message: "Reviews retrieved successfully",
+        message: "Center reviews retrieved successfully",
+        data: result
+    });
+});
+
+const getMyReviews = catchAsync(async (req: Request | any, res: Response) => {
+    const userId = req.user.userId;
+    const result = await ReviewService.getMyReviews(userId);
+
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: "Your reviews retrieved successfully",
         data: result
     });
 });
 
 export const ReviewController = {
     createReview,
-    getCenterReviews
+    getCenterReviews,
+    getMyReviews
 };

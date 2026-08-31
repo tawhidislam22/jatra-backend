@@ -33,10 +33,21 @@ const createCenter = async (userId: string, payload: ICreateCenterRequest) => {
     return result;
 };
 
-const getAllCenters = async () => {
-    return await prisma.automotiveCenter.findMany({
-        include: { admin: true }
-    });
+import { QueryBuilder } from "../../utils/QueryBuilder";
+
+const getAllCenters = async (query: any) => {
+    const centerQuery = new QueryBuilder(prisma.automotiveCenter as any, query, {
+        searchableFields: ['name', 'address'],
+        filterableFields: ['isApproved', 'rating']
+    })
+        .search()
+        .filter()
+        .sort()
+        .paginate()
+        .fields()
+        .include({ admin: true });
+
+    return await centerQuery.execute();
 };
 
 const getCenterById = async (id: string) => {
