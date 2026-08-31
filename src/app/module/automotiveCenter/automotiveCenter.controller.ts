@@ -6,7 +6,11 @@ import status from "http-status";
 
 const createCenter = catchAsync(async (req: Request | any, res: Response) => {
     const userId = req.user.userId;
-    const result = await AutomotiveCenterService.createCenter(userId, req.body);
+    const payload = req.body;
+    if (req.file) {
+        payload.images = [req.file.path];
+    }
+    const result = await AutomotiveCenterService.createCenter(userId, payload);
 
     sendResponse(res, {
         httpStatusCode: status.CREATED,

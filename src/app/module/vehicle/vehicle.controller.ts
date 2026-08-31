@@ -5,7 +5,11 @@ import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
 
 const registerVehicle = catchAsync(async (req: Request | any, res: Response) => {
-    const result = await VehicleService.registerVehicle(req.user, req.body);
+    const payload = req.body;
+    if (req.file) {
+        payload.images = [req.file.path];
+    }
+    const result = await VehicleService.registerVehicle(req.user, payload);
 
     sendResponse(res, {
         httpStatusCode: status.CREATED,
