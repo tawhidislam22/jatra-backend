@@ -1,1 +1,0 @@
-const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const center = await prisma.automotiveCenter.findFirst(); console.log(center); } main().finally(() => process.exit(0));

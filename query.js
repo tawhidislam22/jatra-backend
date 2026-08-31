@@ -1,1 +1,0 @@
-const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const centers = await prisma.automotiveCenter.findMany({ select: { id: true, name: true, servicesOffered: true, adminId: true } }); console.log(JSON.stringify(centers, null, 2)); } main().catch(console.error).finally(() => prisma.\$disconnect());

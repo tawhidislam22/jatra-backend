@@ -131,6 +131,9 @@ const getMe= async(user:any)=>{
     const isUserExists= await prisma.user.findUnique({
         where:{
             id:userId
+        },
+        include: {
+            managedCenter: true
         }
     })
 
