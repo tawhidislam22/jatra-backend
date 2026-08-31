@@ -15,6 +15,8 @@ export const AutomotiveCenterValidation = {
             address: z.string().optional(),
             latitude: z.number().optional(),
             longitude: z.number().optional(),
+            servicesOffered: z.array(z.string()).optional(),
+            images: z.array(z.string()).optional(),
         })
     }),
     addMechanic: z.object({

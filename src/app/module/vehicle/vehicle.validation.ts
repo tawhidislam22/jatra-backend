@@ -9,6 +9,7 @@ export const VehicleValidation = {
             year: z.number().int().min(1900, "Invalid year"),
             licensePlate: z.string().min(1, "License plate is required"),
             type: z.nativeEnum(VehicleType),
+            pricePerDay: z.number().optional(),
             centerId: z.string().optional(), // If registering a fleet vehicle
         })
     }),
@@ -18,6 +19,10 @@ export const VehicleValidation = {
             model: z.string().optional(),
             year: z.number().int().optional(),
             licensePlate: z.string().optional(),
+            pricePerDay: z.number().optional(),
+            isAvailable: z.boolean().optional(),
+            features: z.array(z.string()).optional(),
+            images: z.array(z.string()).optional(),
         })
     })
 };
