@@ -1,0 +1,1 @@
+import { prisma } from './src/app/lib/prisma'; async function main() { const vehicles = await prisma.vehicle.findMany({ where: { centerId: '0e67c1eb-229c-4786-8947-d11bff584c70' } }); console.log(vehicles); } main().finally(() => process.exit(0));

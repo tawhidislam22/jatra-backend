@@ -11,6 +11,7 @@ export const VehicleValidation = {
             type: z.nativeEnum(VehicleType),
             pricePerDay: z.number().optional(),
             centerId: z.string().optional(), // If registering a fleet vehicle
+            images: z.array(z.string()).optional(),
         })
     }),
     updateVehicle: z.object({

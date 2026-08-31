@@ -24,7 +24,7 @@ router.get(
 // Get my reviews
 router.get(
     '/my-reviews',
-    checkAuth(Role.CUSTOMER, Role.ADMIN, Role.MECHANIC),
+    checkAuth(Role.CUSTOMER, Role.OWNER, Role.MECHANIC),
     ReviewController.getMyReviews
 );
 

@@ -18,14 +18,14 @@ router.post(
 // Get emergencies
 router.get(
     '/', 
-    checkAuth(Role.CUSTOMER, Role.ADMIN, Role.MECHANIC), 
+    checkAuth(Role.CUSTOMER, Role.OWNER, Role.MECHANIC), 
     EmergencyAssistanceController.getEmergencies
 );
 
 // Assign mechanic
 router.patch(
     '/:id/assign', 
-    checkAuth(Role.ADMIN), 
+    checkAuth(Role.OWNER), 
     validateRequest(EmergencyAssistanceValidation.assignMechanic),
     EmergencyAssistanceController.assignMechanic
 );
@@ -33,7 +33,7 @@ router.patch(
 // Update status
 router.patch(
     '/:id/status', 
-    checkAuth(Role.ADMIN, Role.MECHANIC), 
+    checkAuth(Role.OWNER, Role.MECHANIC), 
     validateRequest(EmergencyAssistanceValidation.updateStatus),
     EmergencyAssistanceController.updateStatus
 );

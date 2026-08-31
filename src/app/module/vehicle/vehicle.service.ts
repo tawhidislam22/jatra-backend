@@ -12,7 +12,7 @@ const registerVehicle = async (user: any, payload: IRegisterVehicleRequest) => {
     
     // If the user is ADMIN, they register a RENTAL_FLEET vehicle to their center
     let centerId = payload.centerId;
-    if (user.role === Role.ADMIN && payload.type === VehicleType.RENTAL_FLEET) {
+    if (user.role === Role.OWNER && payload.type === VehicleType.RENTAL_FLEET) {
         const center = await prisma.automotiveCenter.findUnique({ where: { adminId: user.userId } });
         if (!center) throw new AppError(status.BAD_REQUEST, "You don't manage any automotive center.");
         centerId = center.id;

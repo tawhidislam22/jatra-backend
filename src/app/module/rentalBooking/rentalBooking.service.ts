@@ -31,7 +31,7 @@ const getBookings = async (user: any) => {
             where: { customerId: user.userId },
             include: { vehicle: true, payment: true }
         });
-    } else if (user.role === Role.ADMIN) {
+    } else if (user.role === Role.OWNER) {
         // Admin sees bookings for their center's vehicles
         const center = await prisma.automotiveCenter.findUnique({ where: { adminId: user.userId } });
         if (!center) throw new AppError(status.BAD_REQUEST, "No center managed by user.");

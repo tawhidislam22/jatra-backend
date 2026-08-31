@@ -7,6 +7,7 @@ export const AutomotiveCenterValidation = {
             address: z.string().min(1, "Address is required"),
             latitude: z.number({ required_error: "Latitude is required" }),
             longitude: z.number({ required_error: "Longitude is required" }),
+            images: z.array(z.string()).optional(),
         })
     }),
     updateCenter: z.object({

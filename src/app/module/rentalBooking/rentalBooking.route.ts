@@ -18,14 +18,14 @@ router.post(
 // Get bookings (Customer sees their own, Admin sees their center's)
 router.get(
     '/', 
-    checkAuth(Role.CUSTOMER, Role.ADMIN), 
+    checkAuth(Role.CUSTOMER, Role.OWNER), 
     RentalBookingController.getBookings
 );
 
 // Update booking status (Admin only)
 router.patch(
     '/:id/status', 
-    checkAuth(Role.ADMIN), 
+    checkAuth(Role.OWNER), 
     validateRequest(RentalBookingValidation.updateBookingStatus),
     RentalBookingController.updateBookingStatus
 );

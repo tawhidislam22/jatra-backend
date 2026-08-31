@@ -1,0 +1,1 @@
+import { prisma } from './src/app/lib/prisma'; async function main() { const v = await prisma.vehicle.create({ data: { make: 'test', model: 'test', year: 2020, licensePlate: 'test-123' + Date.now(), type: 'RENTAL_FLEET', images: ['test-url'] } }); console.log(v); } main().finally(() => process.exit(0));

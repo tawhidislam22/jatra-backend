@@ -24,7 +24,7 @@ const createCenter = async (userId: string, payload: ICreateCenterRequest) => {
         // Ensure user has ADMIN role
         await tx.user.update({
             where: { id: userId },
-            data: { role: Role.ADMIN }
+            data: { role: Role.OWNER }
         });
 
         return center;
@@ -38,7 +38,7 @@ import { QueryBuilder } from "../../utils/QueryBuilder";
 const getAllCenters = async (query: any) => {
     const centerQuery = new QueryBuilder(prisma.automotiveCenter as any, query, {
         searchableFields: ['name', 'address'],
-        filterableFields: ['isApproved', 'rating']
+        filterableFields: ['isApproved', 'rating', 'adminId']
     })
         .search()
         .filter()

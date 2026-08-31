@@ -12,15 +12,15 @@ router.post(
 router.post('/login',AuthController.loginUser)
 
 router.get('/me',
-    checkAuth(Role.CUSTOMER,Role.ADMIN,Role.MECHANIC),
+    checkAuth(Role.CUSTOMER,Role.OWNER,Role.MECHANIC),
 AuthController.getMe)
 
 router.post('/refresh-token',AuthController.getNewToken)
 router.post('/change-password',
-    checkAuth(Role.CUSTOMER,Role.ADMIN,Role.MECHANIC),
+    checkAuth(Role.CUSTOMER,Role.OWNER,Role.MECHANIC),
     AuthController.changePassword)
 router.post('/logout',
-    checkAuth(Role.CUSTOMER,Role.ADMIN,Role.MECHANIC),
+    checkAuth(Role.CUSTOMER,Role.OWNER,Role.MECHANIC),
     AuthController.logoutUser
 )
 

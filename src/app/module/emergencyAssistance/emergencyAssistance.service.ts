@@ -21,7 +21,7 @@ const getEmergencies = async (user: any) => {
     let whereClause: any = {};
     if (user.role === Role.CUSTOMER) {
         whereClause.customerId = user.userId;
-    } else if (user.role === Role.ADMIN) {
+    } else if (user.role === Role.OWNER) {
         const center = await prisma.automotiveCenter.findUnique({ where: { adminId: user.userId } });
         if (!center) throw new AppError(status.BAD_REQUEST, "No center managed by user.");
         whereClause.centerId = center.id;
@@ -58,7 +58,7 @@ const updateStatus = async (id: string, user: any, payload: IUpdateEmergencyStat
     const emergency = await prisma.emergencyAssistance.findUnique({ where: { id }, include: { center: true } });
     if (!emergency) throw new AppError(status.NOT_FOUND, "Emergency request not found.");
 
-    if (user.role === Role.ADMIN && emergency.center.adminId !== user.userId) {
+    if (user.role === Role.OWNER && emergency.center.adminId !== user.userId) {
         throw new AppError(status.FORBIDDEN, "Not authorized to update this request.");
     } else if (user.role === Role.MECHANIC && emergency.mechanicId !== user.userId) {
         throw new AppError(status.FORBIDDEN, "Not assigned to this request.");
