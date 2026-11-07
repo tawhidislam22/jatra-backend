@@ -22,6 +22,13 @@ router.get(
     PaymentController.getPaymentHistory
 );
 
+// Get all platform payments (Admin only)
+router.get(
+    '/all',
+    checkAuth(Role.ADMIN),
+    PaymentController.getAllPayments
+);
+
 // Verify payment status (fallback for missing webhook)
 router.get(
     '/verify',

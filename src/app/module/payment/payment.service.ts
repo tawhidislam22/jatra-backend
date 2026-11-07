@@ -7,7 +7,7 @@ import { PaymentStatus } from "../../../generated/prisma/browser";
 import { ICreateCheckoutSessionRequest } from "./payment.interface";
 
 const stripe = new Stripe(envVars.STRIPE.STRIPE_SECRET_KEY as string, {
-    apiVersion: "2024-04-10",
+    apiVersion: "2026-06-24.dahlia" as any,
 });
 
 const createCheckoutSession = async (userId: string, payload: ICreateCheckoutSessionRequest) => {
@@ -151,14 +151,58 @@ const verifyPayment = async (sessionId: string) => {
 const getPaymentHistory = async (userId: string) => {
     return await prisma.payment.findMany({
         where: { userId },
-        // Payment model doesn't have createdAt, so we remove the orderBy or order by id or paidAt
         orderBy: { paidAt: 'desc' }
     });
+};
+
+const getAllPayments = async (query?: any) => {
+    const { status: paymentStatus, page = 1, limit = 50 } = query || {};
+    const whereClause: any = {};
+    if (paymentStatus) {
+        whereClause.status = paymentStatus;
+    }
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
+
+    const [payments, total] = await Promise.all([
+        prisma.payment.findMany({
+            where: whereClause,
+            skip,
+            take,
+            orderBy: { paidAt: 'desc' },
+            include: {
+                user: {
+                    select: { id: true, name: true, fullName: true, email: true, phone: true }
+                },
+                serviceRequest: {
+                    include: { center: true, vehicle: true }
+                },
+                rentalBooking: {
+                    include: { vehicle: true }
+                },
+                emergencyRequest: {
+                    include: { center: true }
+                }
+            }
+        }),
+        prisma.payment.count({ where: whereClause })
+    ]);
+
+    return {
+        meta: {
+            page: Number(page),
+            limit: Number(limit),
+            total,
+            totalPages: Math.ceil(total / Number(limit))
+        },
+        data: payments
+    };
 };
 
 export const PaymentService = {
     createCheckoutSession,
     handleStripeWebhookEvent,
     getPaymentHistory,
+    getAllPayments,
     verifyPayment
 };

@@ -4,15 +4,15 @@ import { RequestStatus } from "../../../generated/prisma/browser";
 export const EmergencyAssistanceValidation = {
     requestAssistance: z.object({
         body: z.object({
-            latitude: z.number({ required_error: "Latitude is required" }),
-            longitude: z.number({ required_error: "Longitude is required" }),
+            latitude: z.number(),
+            longitude: z.number(),
             issueDescription: z.string().min(1, "Issue description is required"),
-            centerId: z.string({ required_error: "Center ID is required" }),
+            centerId: z.string().min(1, "Center ID is required"),
         })
     }),
     assignMechanic: z.object({
         body: z.object({
-            mechanicId: z.string({ required_error: "Mechanic ID is required" }),
+            mechanicId: z.string().min(1, "Mechanic ID is required"),
         })
     }),
     updateStatus: z.object({

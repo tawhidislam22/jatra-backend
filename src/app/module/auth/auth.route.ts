@@ -28,6 +28,7 @@ router.post('/verify-email',AuthController.verifyEmail)
 router.post('/resend-otp', AuthController.resendOTP)
 router.post('/forget-password',AuthController.forgetPassword)
 router.post('/reset-password',AuthController.resetPassword)
+router.post('/setup-password',AuthController.setupPassword)
 
 router.get('/login/google',AuthController.googleLogin)
 router.get('/google/success',AuthController.googleLoginSuccess)

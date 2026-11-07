@@ -65,8 +65,42 @@ const loginUser = catchAsync(
 const getMe = catchAsync(
     async (req: Request, res: Response) => {
         const user = req.user;
-        console.log({user});
         const result = await AuthService.getMe(user);
+
+        // If the database user role has changed or center was assigned
+        if (result && (result.role !== user.role || result.employedAtCenterId !== (user as any).employedAtCenterId)) {
+            const centerInfo = result.employedAtCenter ? {
+                id: result.employedAtCenter.id,
+                name: result.employedAtCenter.name,
+                address: result.employedAtCenter.address,
+                phone: result.employedAtCenter.phone,
+                rating: result.employedAtCenter.rating,
+            } : undefined;
+
+            const managedCenterInfo = result.managedCenter ? {
+                id: result.managedCenter.id,
+                name: result.managedCenter.name,
+                address: result.managedCenter.address,
+            } : undefined;
+
+            const newAccessToken = tokenUtils.getAccessToken({
+                userId: result.id,
+                role: result.role,
+                name: result.name,
+                fullName: result.fullName || result.name,
+                email: result.email,
+                phone: result.phone,
+                status: result.status,
+                isDeleted: result.isDeleted,
+                emailVerified: result.emailVerified,
+                employedAtCenterId: result.employedAtCenterId,
+                employedAtCenter: centerInfo,
+                managedCenter: managedCenterInfo,
+            });
+            tokenUtils.setAccessTokenCookie(res, newAccessToken);
+            (result as any).accessToken = newAccessToken;
+        }
+
         sendResponse(res, {
             httpStatusCode: status.OK,
             success: true,
@@ -275,6 +309,26 @@ const handleOAuthError = catchAsync((req: Request, res: Response) => {
     res.redirect(`${envVars.FRONTEND_URL}/login?error=${error}`);
 })
 
+const setupPassword = catchAsync(async (req: Request, res: Response) => {
+    const payload = req.body;
+    const result = await AuthService.setupPassword(payload);
+    const { accessToken, refreshToken, user } = result;
+
+    tokenUtils.setAccessTokenCookie(res, accessToken);
+    tokenUtils.setRefreshTokenCookie(res, refreshToken);
+
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: "Password set and account activated successfully",
+        data: {
+            accessToken,
+            refreshToken,
+            user,
+        }
+    });
+});
+
 export const AuthController = {
     registerUser,
     loginUser,
@@ -286,6 +340,7 @@ export const AuthController = {
     resendOTP,
     forgetPassword,
     resetPassword,
+    setupPassword,
     googleLogin,
     googleLoginSuccess,
     handleOAuthError,

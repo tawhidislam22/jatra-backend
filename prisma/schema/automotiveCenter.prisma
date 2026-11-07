@@ -5,11 +5,12 @@ model AutomotiveCenter {
   latitude        Float
   longitude       Float
   phone           String?
+  description     String?
   rating          Float    @default(0)
   isApproved      Boolean  @default(false)
   servicesOffered String[]
   images          String[]
-  adminId         String   @unique
+  adminId         String
 
   // Relations
   admin     User   @relation("CenterAdmin", fields: [adminId], references: [id])
@@ -19,4 +20,8 @@ model AutomotiveCenter {
   serviceRequests   ServiceRequest[]
   emergencyRequests EmergencyAssistance[]
   reviews           Review[]
+
+  @@index([adminId])
+  @@index([isApproved])
+  @@index([rating])
 }

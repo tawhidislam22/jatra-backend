@@ -17,4 +17,7 @@ model Review {
 
   serviceRequestId String?         @unique
   serviceRequest   ServiceRequest? @relation(fields: [serviceRequestId], references: [id])
+
+  @@index([customerId])
+  @@index([centerId])
 }

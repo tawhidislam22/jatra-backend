@@ -35,8 +35,26 @@ const getMyReviews = async (userId: string) => {
     });
 };
 
+const getAllReviews = async () => {
+    return await prisma.review.findMany({
+        include: { customer: true, center: true },
+        orderBy: { createdAt: 'desc' }
+    });
+};
+
+const deleteReview = async (id: string) => {
+    const review = await prisma.review.findUnique({ where: { id } });
+    if (!review) throw new AppError(status.NOT_FOUND, "Review not found.");
+
+    return await prisma.review.delete({
+        where: { id }
+    });
+};
+
 export const ReviewService = {
     createReview,
     getCenterReviews,
-    getMyReviews
+    getMyReviews,
+    getAllReviews,
+    deleteReview
 };

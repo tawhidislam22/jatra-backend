@@ -31,12 +31,30 @@ const getRequests = async (user: any) => {
     let whereClause: any = {};
     if (user.role === Role.CUSTOMER) {
         whereClause.customerId = user.userId;
-    } else if (user.role === Role.OWNER) {
-        const center = await prisma.automotiveCenter.findUnique({ where: { adminId: user.userId } });
-        if (!center) throw new AppError(status.BAD_REQUEST, "No center managed by user.");
-        whereClause.centerId = center.id;
+    } else if (user.role === Role.OWNER || user.role === Role.ADMIN) {
+        const centers = await prisma.automotiveCenter.findMany({ where: { adminId: user.userId } });
+        if (centers.length === 0) {
+            if (user.role === Role.ADMIN) {
+                return await prisma.serviceRequest.findMany({
+                    where: {},
+                    include: { vehicle: true, customer: true, center: true, mechanic: true, payment: true }
+                });
+            }
+            return [];
+        }
+        whereClause.centerId = { in: centers.map(c => c.id) };
     } else if (user.role === Role.MECHANIC) {
-        whereClause.mechanicId = user.userId;
+        const dbMechanic = await prisma.user.findUnique({ where: { id: user.userId } });
+        if (dbMechanic?.employedAtCenterId) {
+            whereClause = {
+                OR: [
+                    { mechanicId: user.userId },
+                    { centerId: dbMechanic.employedAtCenterId }
+                ]
+            };
+        } else {
+            whereClause.mechanicId = user.userId;
+        }
     }
 
     return await prisma.serviceRequest.findMany({
@@ -49,7 +67,8 @@ const assignMechanic = async (id: string, adminId: string, mechanicId: string) =
     const request = await prisma.serviceRequest.findUnique({ where: { id }, include: { center: true } });
     if (!request) throw new AppError(status.NOT_FOUND, "Service request not found.");
 
-    if (request.center.adminId !== adminId) {
+    const adminUser = await prisma.user.findUnique({ where: { id: adminId } });
+    if (adminUser?.role !== Role.ADMIN && request.center.adminId !== adminId) {
         throw new AppError(status.FORBIDDEN, "Not authorized to assign mechanic for this center.");
     }
 
@@ -68,7 +87,7 @@ const updateStatus = async (id: string, user: any, payload: IUpdateServiceReques
     const request = await prisma.serviceRequest.findUnique({ where: { id }, include: { center: true } });
     if (!request) throw new AppError(status.NOT_FOUND, "Service request not found.");
 
-    if (user.role === Role.OWNER && request.center.adminId !== user.userId) {
+    if ((user.role === Role.OWNER || user.role === Role.ADMIN) && user.role !== Role.ADMIN && request.center.adminId !== user.userId) {
         throw new AppError(status.FORBIDDEN, "Not authorized to update this request.");
     } else if (user.role === Role.MECHANIC && request.mechanicId !== user.userId) {
         throw new AppError(status.FORBIDDEN, "Not assigned to this request.");

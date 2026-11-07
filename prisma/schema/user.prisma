@@ -29,10 +29,14 @@ model User {
   reviews             Review[]
 
   // Center Management & Employment
-  managedCenter AutomotiveCenter? @relation("CenterAdmin")
+  managedCenters AutomotiveCenter[] @relation("CenterAdmin")
 
   employedAtCenterId String?
   employedAtCenter   AutomotiveCenter? @relation("CenterMechanics", fields: [employedAtCenterId], references: [id])
 
+  @@index([role])
+  @@index([status])
+  @@index([employedAtCenterId])
+  @@index([role, status])
   @@map("user")
 }

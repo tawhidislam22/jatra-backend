@@ -10,12 +10,19 @@ const registerVehicle = async (user: any, payload: IRegisterVehicleRequest) => {
         throw new AppError(status.FORBIDDEN, "Customers can only register their own vehicles.");
     }
     
-    // If the user is ADMIN, they register a RENTAL_FLEET vehicle to their center
+    // If the user is OWNER, they register a RENTAL_FLEET vehicle to their center
     let centerId = payload.centerId;
     if (user.role === Role.OWNER && payload.type === VehicleType.RENTAL_FLEET) {
-        const center = await prisma.automotiveCenter.findUnique({ where: { adminId: user.userId } });
-        if (!center) throw new AppError(status.BAD_REQUEST, "You don't manage any automotive center.");
-        centerId = center.id;
+        if (!centerId) {
+            const center = await prisma.automotiveCenter.findFirst({ where: { adminId: user.userId } });
+            if (!center) throw new AppError(status.BAD_REQUEST, "You don't manage any automotive center.");
+            centerId = center.id;
+        } else {
+            const center = await prisma.automotiveCenter.findUnique({ where: { id: centerId } });
+            if (!center || center.adminId !== user.userId) {
+                throw new AppError(status.FORBIDDEN, "You do not own this automotive center.");
+            }
+        }
     }
 
     return await prisma.vehicle.create({
@@ -25,6 +32,9 @@ const registerVehicle = async (user: any, payload: IRegisterVehicleRequest) => {
             year: payload.year,
             licensePlate: payload.licensePlate,
             type: payload.type,
+            pricePerDay: payload.pricePerDay,
+            features: payload.features || [],
+            images: payload.images || [],
             ownerId: payload.type === VehicleType.CUSTOMER_OWNED ? user.userId : null,
             centerId: centerId
         }

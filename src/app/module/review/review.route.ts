@@ -28,4 +28,18 @@ router.get(
     ReviewController.getMyReviews
 );
 
+// Get all reviews across platform (Admin only)
+router.get(
+    '/all',
+    checkAuth(Role.ADMIN),
+    ReviewController.getAllReviews
+);
+
+// Delete/moderate a review (Admin only)
+router.delete(
+    '/:id',
+    checkAuth(Role.ADMIN),
+    ReviewController.deleteReview
+);
+
 export const ReviewRoutes = router;

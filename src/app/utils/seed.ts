@@ -6,13 +6,13 @@ import { prisma } from "../lib/prisma";
 export const seedSuperAdmin = async () => {
     try {
         const isSuperAdminExist = await prisma.user.findFirst({
-            where:{
-                role : Role.SUPER_ADMIN
+            where: {
+                role: Role.ADMIN
             }
-        })
+        });
 
-        if(isSuperAdminExist) {
-            console.log("Super admin already exists. Skipping seeding super admin.");
+        if (isSuperAdminExist) {
+            console.log("Admin already exists. Skipping seeding.");
             return;
         }
 
@@ -23,77 +23,39 @@ export const seedSuperAdmin = async () => {
         });
 
         if (existingEmailUser) {
-            console.log("A user with the super admin email already exists but is not a super admin. Promoting them to super admin.");
-            await prisma.$transaction(async (tx) => {
-                await tx.user.update({
-                    where: { email: envVars.SUPER_ADMIN_EMAIL },
-                    data: { role: Role.SUPER_ADMIN, emailVerified: true }
-                });
-
-                const adminRecord = await tx.admin.findFirst({
-                    where: { email: envVars.SUPER_ADMIN_EMAIL }
-                });
-
-                if (!adminRecord) {
-                    await tx.admin.create({
-                        data: {
-                            userId: existingEmailUser.id,
-                            name: "Super Admin",
-                            email: envVars.SUPER_ADMIN_EMAIL,
-                        }
-                    });
-                }
+            console.log("A user with the admin email already exists. Promoting them to admin.");
+            await prisma.user.update({
+                where: { email: envVars.SUPER_ADMIN_EMAIL },
+                data: { role: Role.ADMIN, emailVerified: true }
             });
-            console.log("Existing user promoted to Super Admin.");
+            console.log("Existing user promoted to Admin.");
             return;
         }
 
         const superAdminUser = await auth.api.signUpEmail({
-            body:{
-                email : envVars.SUPER_ADMIN_EMAIL,
-                password : envVars.SUPER_ADMIN_PASSWORD,
-                name : "Super Admin",
-                role : Role.SUPER_ADMIN,
-                needPasswordChange : false,
-                rememberMe : false,
+            body: {
+                email: envVars.SUPER_ADMIN_EMAIL,
+                password: envVars.SUPER_ADMIN_PASSWORD,
+                name: "Admin",
+                role: Role.ADMIN,
+                needPasswordChange: false,
+                rememberMe: false,
             }
-        })
-
-        await prisma.$transaction(async (tx) => {
-            await tx.user.update({
-                where : {
-                    id : superAdminUser.user.id
-                },
-                data : {
-                    emailVerified : true,
-                }
-            });
-
-            await tx.admin.create({
-                data : {
-                    userId : superAdminUser.user.id,
-                    name : "Super Admin",
-                    email : envVars.SUPER_ADMIN_EMAIL,
-                }
-            })
         });
 
-        const superAdmin = await prisma.admin.findFirst({
-            where : {
-                email : envVars.SUPER_ADMIN_EMAIL,
-            },
-            include : {
-                user : true,
-            }
-        })
-
-        console.log("Super Admin Created ", superAdmin);
+        if (superAdminUser?.user) {
+            await prisma.user.update({
+                where: {
+                    id: superAdminUser.user.id
+                },
+                data: {
+                    role: Role.ADMIN,
+                    emailVerified: true,
+                }
+            });
+            console.log("Admin Created: ", superAdminUser.user.email);
+        }
     } catch (error) {
-        console.error("Error seeding super admin: ", error);
-        await prisma.user.delete({
-            where : {
-                email : envVars.SUPER_ADMIN_EMAIL,
-            }
-        })
+        console.error("Error seeding admin: ", error);
     }
-}
+};

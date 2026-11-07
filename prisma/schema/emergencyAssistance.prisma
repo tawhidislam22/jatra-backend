@@ -14,4 +14,9 @@ model EmergencyAssistance {
   mechanicId String?
   mechanic   User?            @relation("MechanicEmergencies", fields: [mechanicId], references: [id])
   payment    Payment?
+
+  @@index([customerId])
+  @@index([centerId])
+  @@index([mechanicId])
+  @@index([status])
 }

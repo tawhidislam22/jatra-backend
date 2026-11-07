@@ -20,4 +20,9 @@ model Vehicle {
 
   rentalBookings  RentalBooking[]
   serviceRequests ServiceRequest[]
+
+  @@index([ownerId])
+  @@index([centerId])
+  @@index([type])
+  @@index([isAvailable])
 }

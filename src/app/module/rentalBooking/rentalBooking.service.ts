@@ -31,19 +31,26 @@ const getBookings = async (user: any) => {
             where: { customerId: user.userId },
             include: { vehicle: true, payment: true }
         });
-    } else if (user.role === Role.OWNER) {
-        // Admin sees bookings for their center's vehicles
-        const center = await prisma.automotiveCenter.findUnique({ where: { adminId: user.userId } });
-        if (!center) throw new AppError(status.BAD_REQUEST, "No center managed by user.");
+    } else if (user.role === Role.OWNER || user.role === Role.ADMIN) {
+        // Admin/Owner sees bookings for their centers' vehicles
+        const centers = await prisma.automotiveCenter.findMany({ where: { adminId: user.userId } });
+        if (centers.length === 0) {
+            if (user.role === Role.ADMIN) {
+                return await prisma.rentalBooking.findMany({
+                    include: { vehicle: true, customer: true, payment: true }
+                });
+            }
+            return [];
+        }
 
         return await prisma.rentalBooking.findMany({
             where: {
-                vehicle: { centerId: center.id }
+                vehicle: { centerId: { in: centers.map(c => c.id) } }
             },
             include: { vehicle: true, customer: true, payment: true }
         });
     }
-    throw new AppError(status.FORBIDDEN, "Unauthorized");
+    return [];
 };
 
 const updateBookingStatus = async (id: string, adminId: string, payload: IUpdateBookingStatusRequest) => {
@@ -54,9 +61,9 @@ const updateBookingStatus = async (id: string, adminId: string, payload: IUpdate
     
     if (!booking) throw new AppError(status.NOT_FOUND, "Booking not found.");
 
-    // Verify admin owns the center that owns this vehicle
-    const center = await prisma.automotiveCenter.findUnique({ where: { adminId } });
-    if (!center || center.id !== booking.vehicle.centerId) {
+    const adminUser = await prisma.user.findUnique({ where: { id: adminId } });
+    const centers = await prisma.automotiveCenter.findMany({ where: { adminId } });
+    if (adminUser?.role !== Role.ADMIN && !centers.some(c => c.id === booking.vehicle.centerId)) {
         throw new AppError(status.FORBIDDEN, "Not authorized to update this booking.");
     }
 

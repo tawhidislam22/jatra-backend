@@ -18,4 +18,7 @@ model Payment {
 
   emergencyId      String?              @unique
   emergencyRequest EmergencyAssistance? @relation(fields: [emergencyId], references: [id])
+
+  @@index([userId])
+  @@index([status])
 }

@@ -45,9 +45,22 @@ const verifyPayment = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getAllPayments = catchAsync(async (req: Request | any, res: Response) => {
+    const result = await PaymentService.getAllPayments(req.query);
+
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: "All platform payments retrieved successfully",
+        meta: result.meta,
+        data: result.data
+    });
+});
+
 export const PaymentController = {
     createCheckoutSession,
     handleStripeWebhookEvent,
     getPaymentHistory,
+    getAllPayments,
     verifyPayment
 };

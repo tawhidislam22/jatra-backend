@@ -5,9 +5,36 @@ import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
 
 const registerVehicle = catchAsync(async (req: Request | any, res: Response) => {
-    const payload = req.body;
+    let payload = { ...req.body };
+    if (payload.data && typeof payload.data === 'string') {
+        try {
+            payload = { ...JSON.parse(payload.data), ...payload };
+            delete payload.data;
+        } catch {
+            // keep as is
+        }
+    }
     if (req.file) {
         payload.images = [req.file.path];
+    } else if (typeof payload.images === 'string') {
+        try {
+            payload.images = JSON.parse(payload.images);
+        } catch {
+            payload.images = [payload.images];
+        }
+    }
+    if (typeof payload.year === 'string') {
+        payload.year = parseInt(payload.year, 10);
+    }
+    if (typeof payload.pricePerDay === 'string') {
+        payload.pricePerDay = parseFloat(payload.pricePerDay);
+    }
+    if (typeof payload.features === 'string') {
+        try {
+            payload.features = JSON.parse(payload.features);
+        } catch {
+            payload.features = payload.features.split(',').map((f: string) => f.trim()).filter(Boolean);
+        }
     }
     const result = await VehicleService.registerVehicle(req.user, payload);
 
@@ -43,7 +70,7 @@ const getMyVehicles = catchAsync(async (req: Request | any, res: Response) => {
 });
 
 const updateVehicle = catchAsync(async (req: Request | any, res: Response) => {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const result = await VehicleService.updateVehicle(id, req.user, req.body);
 
     sendResponse(res, {
@@ -55,7 +82,7 @@ const updateVehicle = catchAsync(async (req: Request | any, res: Response) => {
 });
 
 const getVehicleById = catchAsync(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const result = await VehicleService.getVehicleById(id);
 
     sendResponse(res, {

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to Jatra - Mechanic Account Created</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-font-smoothing: antialiased;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f5; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="100%" max-width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #E60000; padding: 32px 30px; text-align: center;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">JATRA</h1>
+                            <p style="color: #ffffff; opacity: 0.9; margin: 6px 0 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600;">Mechanic Portal</p>
+                        </td>
+                    </tr>
+
+                    <!-- Body Content -->
+                    <tr>
+                        <td style="padding: 40px 40px 25px 40px;">
+                            <h2 style="margin: 0 0 16px 0; font-size: 22px; color: #1a1a1a; font-weight: 800;">Hello <%= name %>,</h2>
+                            <p style="margin: 0 0 24px 0; font-size: 15px; color: #475569; line-height: 1.6;">
+                                You have been added as a <strong>Service Mechanic</strong> for <strong><%= centerName %></strong> on Jatra. Your account has been initialized with the temporary login credentials below:
+                            </p>
+
+                            <!-- Credentials Box -->
+                            <div style="background-color: #f8fafc; border: 2px solid #e2e8f0; border-left: 5px solid #E60000; border-radius: 6px; padding: 20px; margin-bottom: 28px;">
+                                <div style="margin-bottom: 12px;">
+                                    <span style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 1px;">Email Address</span>
+                                    <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;"><%= email %></span>
+                                </div>
+                                <div>
+                                    <span style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 1px;">Temporary Password</span>
+                                    <span style="display: inline-block; font-family: monospace; font-size: 17px; font-weight: 800; color: #E60000; background-color: #fee2e2; padding: 4px 10px; border-radius: 4px; margin-top: 4px;"><%= password %></span>
+                                </div>
+                            </div>
+
+                            <p style="margin: 0 0 28px 0; font-size: 14px; color: #475569; line-height: 1.6;">
+                                To secure and activate your account, please click the button below to set your permanent password. You will then be taken directly to your Mechanic Dashboard to manage assigned tasks and repairs.
+                            </p>
+
+                            <!-- CTA Button -->
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <a href="<%= resetUrl %>" style="display: inline-block; background-color: #E60000; color: #ffffff; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; text-decoration: none; padding: 16px 36px; border-radius: 4px; box-shadow: 0 4px 12px rgba(230, 0, 0, 0.25);">
+                                    Activate & Set Password &rarr;
+                                </a>
+                            </div>
+
+                            <p style="margin: 0 0 10px 0; font-size: 12px; color: #94a3b8; line-height: 1.5;">
+                                If the button above does not work, copy and paste this link into your browser:<br />
+                                <a href="<%= resetUrl %>" style="color: #E60000; word-break: break-all; text-decoration: underline;"><%= resetUrl %></a>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 25px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #64748b;">
+                                <%= centerName %> &bull; Powered by Jatra Automotive Platform
+                            </p>
+                            <p style="margin: 0; font-size: 11px; color: #94a3b8;">
+                                &copy; 2026 Jatra. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

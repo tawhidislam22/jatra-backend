@@ -4,10 +4,10 @@ import { RequestStatus } from "../../../generated/prisma/browser";
 export const RentalBookingValidation = {
     createBooking: z.object({
         body: z.object({
-            vehicleId: z.string({ required_error: "Vehicle ID is required" }),
-            pickupDate: z.string({ required_error: "Pickup date is required" }).transform(str => new Date(str)),
-            returnDate: z.string({ required_error: "Return date is required" }).transform(str => new Date(str)),
-            totalAmount: z.number({ required_error: "Total amount is required" }),
+            vehicleId: z.string().min(1, "Vehicle ID is required"),
+            pickupDate: z.string().min(1, "Pickup date is required").transform(str => new Date(str)),
+            returnDate: z.string().min(1, "Return date is required").transform(str => new Date(str)),
+            totalAmount: z.number(),
         })
     }),
     updateBookingStatus: z.object({

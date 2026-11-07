@@ -2,21 +2,51 @@ import { Request, Response } from "express";
 import { catchAsync } from "../../shared/catchAsync";
 import { AutomotiveCenterService } from "./automotiveCenter.service";
 import { sendResponse } from "../../shared/sendResponse";
+import { tokenUtils } from "../../utils/token";
 import status from "http-status";
 
 const createCenter = catchAsync(async (req: Request | any, res: Response) => {
     const userId = req.user.userId;
-    const payload = req.body;
+    const payload = { ...req.body };
     if (req.file) {
         payload.images = [req.file.path];
+    } else if (typeof payload.images === 'string') {
+        try {
+            payload.images = JSON.parse(payload.images);
+        } catch {
+            payload.images = [payload.images];
+        }
+    }
+    if (typeof payload.servicesOffered === 'string') {
+        try {
+            payload.servicesOffered = JSON.parse(payload.servicesOffered);
+        } catch {
+            payload.servicesOffered = [payload.servicesOffered];
+        }
     }
     const result = await AutomotiveCenterService.createCenter(userId, payload);
+
+    // Issue updated accessToken with OWNER role
+    const newAccessToken = tokenUtils.getAccessToken({
+        userId: req.user.userId,
+        role: "OWNER",
+        name: req.user.name,
+        fullName: req.user.fullName || req.user.name,
+        email: req.user.email,
+        status: req.user.status,
+        isDeleted: req.user.isDeleted,
+        emailVerified: req.user.emailVerified,
+    });
+    tokenUtils.setAccessTokenCookie(res, newAccessToken);
 
     sendResponse(res, {
         httpStatusCode: status.CREATED,
         success: true,
         message: "Automotive Center registered successfully",
-        data: result
+        data: {
+            ...result,
+            accessToken: newAccessToken,
+        }
     });
 });
 
@@ -33,7 +63,7 @@ const getAllCenters = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getCenterById = catchAsync(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const result = await AutomotiveCenterService.getCenterById(id);
 
     sendResponse(res, {
@@ -45,9 +75,26 @@ const getCenterById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateCenter = catchAsync(async (req: Request | any, res: Response) => {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const adminId = req.user.userId;
-    const result = await AutomotiveCenterService.updateCenter(id, adminId, req.body);
+    const payload = { ...req.body };
+    if (req.file) {
+        payload.images = [req.file.path];
+    } else if (typeof payload.images === 'string') {
+        try {
+            payload.images = JSON.parse(payload.images);
+        } catch {
+            payload.images = [payload.images];
+        }
+    }
+    if (typeof payload.servicesOffered === 'string') {
+        try {
+            payload.servicesOffered = JSON.parse(payload.servicesOffered);
+        } catch {
+            payload.servicesOffered = [payload.servicesOffered];
+        }
+    }
+    const result = await AutomotiveCenterService.updateCenter(id, adminId, payload);
 
     sendResponse(res, {
         httpStatusCode: status.OK,
@@ -60,9 +107,8 @@ const updateCenter = catchAsync(async (req: Request | any, res: Response) => {
 const addMechanicToCenter = catchAsync(async (req: Request | any, res: Response) => {
     const { id } = req.params;
     const adminId = req.user.userId;
-    const { mechanicId } = req.body;
     
-    const result = await AutomotiveCenterService.addMechanicToCenter(id, adminId, mechanicId);
+    const result = await AutomotiveCenterService.addMechanicToCenter(id, adminId, req.body);
 
     sendResponse(res, {
         httpStatusCode: status.OK,
@@ -72,10 +118,37 @@ const addMechanicToCenter = catchAsync(async (req: Request | any, res: Response)
     });
 });
 
+const verifyCenter = catchAsync(async (req: Request | any, res: Response) => {
+    const { id } = req.params;
+    const { isApproved } = req.body;
+    const result = await AutomotiveCenterService.verifyCenter(id, isApproved ?? true);
+
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: isApproved ? "Automotive Center approved successfully" : "Automotive Center approval revoked",
+        data: result
+    });
+});
+
+const deleteCenter = catchAsync(async (req: Request | any, res: Response) => {
+    const { id } = req.params;
+    const result = await AutomotiveCenterService.deleteCenter(id);
+
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: "Automotive Center deleted successfully",
+        data: result
+    });
+});
+
 export const AutomotiveCenterController = {
     createCenter,
     getAllCenters,
     getCenterById,
     updateCenter,
-    addMechanicToCenter
+    addMechanicToCenter,
+    verifyCenter,
+    deleteCenter
 };

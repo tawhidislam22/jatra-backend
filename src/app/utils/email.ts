@@ -7,14 +7,14 @@ import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
 
 const transporter = nodemailer.createTransport({
-    host : envVars.EMAIL_SENDER.SMTP_HOST,
-    secure: true,
+    host: envVars.EMAIL_SENDER.SMTP_HOST,
+    port: Number(envVars.EMAIL_SENDER.SMTP_PORT) || 465,
+    secure: Number(envVars.EMAIL_SENDER.SMTP_PORT) === 465,
     auth: {
         user: envVars.EMAIL_SENDER.SMTP_USER,
         pass: envVars.EMAIL_SENDER.SMTP_PASS
-    },
-    port: Number(envVars.EMAIL_SENDER.SMTP_PORT)
-})
+    }
+});
 
 interface SendEmailOptions {
     to: string;

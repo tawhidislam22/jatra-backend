@@ -21,12 +21,30 @@ const getEmergencies = async (user: any) => {
     let whereClause: any = {};
     if (user.role === Role.CUSTOMER) {
         whereClause.customerId = user.userId;
-    } else if (user.role === Role.OWNER) {
-        const center = await prisma.automotiveCenter.findUnique({ where: { adminId: user.userId } });
-        if (!center) throw new AppError(status.BAD_REQUEST, "No center managed by user.");
-        whereClause.centerId = center.id;
+    } else if (user.role === Role.OWNER || user.role === Role.ADMIN) {
+        const centers = await prisma.automotiveCenter.findMany({ where: { adminId: user.userId } });
+        if (centers.length === 0) {
+            if (user.role === Role.ADMIN) {
+                return await prisma.emergencyAssistance.findMany({
+                    where: {},
+                    include: { customer: true, center: true, mechanic: true, payment: true }
+                });
+            }
+            return [];
+        }
+        whereClause.centerId = { in: centers.map(c => c.id) };
     } else if (user.role === Role.MECHANIC) {
-        whereClause.mechanicId = user.userId;
+        const dbMechanic = await prisma.user.findUnique({ where: { id: user.userId } });
+        if (dbMechanic?.employedAtCenterId) {
+            whereClause = {
+                OR: [
+                    { mechanicId: user.userId },
+                    { centerId: dbMechanic.employedAtCenterId }
+                ]
+            };
+        } else {
+            whereClause.mechanicId = user.userId;
+        }
     }
 
     return await prisma.emergencyAssistance.findMany({
@@ -39,7 +57,8 @@ const assignMechanic = async (id: string, adminId: string, mechanicId: string) =
     const emergency = await prisma.emergencyAssistance.findUnique({ where: { id }, include: { center: true } });
     if (!emergency) throw new AppError(status.NOT_FOUND, "Emergency request not found.");
 
-    if (emergency.center.adminId !== adminId) {
+    const adminUser = await prisma.user.findUnique({ where: { id: adminId } });
+    if (adminUser?.role !== Role.ADMIN && emergency.center.adminId !== adminId) {
         throw new AppError(status.FORBIDDEN, "Not authorized to assign mechanic for this center.");
     }
 

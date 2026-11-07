@@ -10,7 +10,7 @@ const router = Router();
 // Create service request
 router.post(
     '/', 
-    checkAuth(Role.CUSTOMER, Role.OWNER), 
+    checkAuth(Role.CUSTOMER, Role.OWNER, Role.ADMIN), 
     validateRequest(ServiceRequestValidation.createRequest),
     ServiceRequestController.createRequest
 );
@@ -18,14 +18,14 @@ router.post(
 // Get service requests
 router.get(
     '/', 
-    checkAuth(Role.CUSTOMER, Role.OWNER, Role.MECHANIC), 
+    checkAuth(Role.CUSTOMER, Role.OWNER, Role.ADMIN, Role.MECHANIC), 
     ServiceRequestController.getRequests
 );
 
 // Assign mechanic
 router.patch(
     '/:id/assign', 
-    checkAuth(Role.OWNER), 
+    checkAuth(Role.OWNER, Role.ADMIN), 
     validateRequest(ServiceRequestValidation.assignMechanic),
     ServiceRequestController.assignMechanic
 );
@@ -33,7 +33,7 @@ router.patch(
 // Update status
 router.patch(
     '/:id/status', 
-    checkAuth(Role.OWNER, Role.MECHANIC), 
+    checkAuth(Role.OWNER, Role.ADMIN, Role.MECHANIC), 
     validateRequest(ServiceRequestValidation.updateStatus),
     ServiceRequestController.updateStatus
 );

@@ -7,6 +7,9 @@ export interface IRegisterVehicleRequest {
     licensePlate: string;
     type: VehicleType;
     centerId?: string;
+    pricePerDay?: number;
+    features?: string[];
+    images?: string[];
 }
 
 export interface IUpdateVehicleRequest {
@@ -14,6 +17,10 @@ export interface IUpdateVehicleRequest {
     model?: string;
     year?: number;
     licensePlate?: string;
+    pricePerDay?: number;
+    isAvailable?: boolean;
+    features?: string[];
+    images?: string[];
 }
 
 export interface IVehicleFilterQuery {

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import z from "zod";
 
-export const validateRequest = (zodSchema: z.ZodObject<any, any, any>) => {
+export const validateRequest = (zodSchema: z.ZodTypeAny) => {
     return (req: Request, res: Response, next: NextFunction) => {
         if (req.body.data) {
             try {
@@ -23,10 +23,11 @@ export const validateRequest = (zodSchema: z.ZodObject<any, any, any>) => {
         }
 
         // Only overwrite properties that were successfully parsed to avoid destroying the rest of req
-        if (parsedResult.data.body) req.body = parsedResult.data.body;
-        if (parsedResult.data.query) req.query = parsedResult.data.query;
-        if (parsedResult.data.params) req.params = parsedResult.data.params;
-        if (parsedResult.data.cookies) req.cookies = parsedResult.data.cookies;
+        const parsedData = parsedResult.data as any;
+        if (parsedData?.body) req.body = parsedData.body;
+        if (parsedData?.query) req.query = parsedData.query;
+        if (parsedData?.params) req.params = parsedData.params;
+        if (parsedData?.cookies) req.cookies = parsedData.cookies;
 
         next();
     }

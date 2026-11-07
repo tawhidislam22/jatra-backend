@@ -12,4 +12,9 @@ model RentalBooking {
   vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
   payment    Payment?
   review     Review?
+
+  @@index([customerId])
+  @@index([vehicleId])
+  @@index([status])
+  @@index([pickupDate, returnDate])
 }
