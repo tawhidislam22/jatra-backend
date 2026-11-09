@@ -40,6 +40,13 @@ router.post(
     AutomotiveCenterController.addMechanicToCenter
 );
 
+// Remove / unassign a mechanic from the center (Only the owning OWNER / ADMIN)
+router.delete(
+    '/:id/mechanics/:mechanicId', 
+    checkAuth(Role.OWNER, Role.ADMIN), 
+    AutomotiveCenterController.removeMechanicFromCenter
+);
+
 // Verify center approval status (Admin only)
 router.patch(
     '/:id/verify', 

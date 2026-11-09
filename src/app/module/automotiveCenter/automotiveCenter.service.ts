@@ -207,6 +207,9 @@ const getAllCenters = async (query: any) => {
 };
 
 const getCenterById = async (id: string) => {
+    if (!id || typeof id !== 'string' || id.trim() === '' || id === 'undefined' || id === 'null') {
+        throw new AppError(status.NOT_FOUND, "Automotive Center not found.");
+    }
     const center = await prisma.automotiveCenter.findUnique({
         where: { id },
         include: {
@@ -314,9 +317,22 @@ const addMechanicToCenter = async (centerId: string, adminId: string, payload: a
 
     // 1. Assign existing mechanic by ID
     if (mechanicId) {
-        const mechanic = await prisma.user.findUnique({ where: { id: mechanicId } });
+        const mechanic = await prisma.user.findUnique({
+            where: { id: mechanicId },
+            include: { employedAtCenter: true }
+        });
         if (!mechanic) {
             throw new AppError(status.NOT_FOUND, "Mechanic user not found.");
+        }
+        if (mechanic.employedAtCenterId === centerId) {
+            throw new AppError(status.BAD_REQUEST, "Mechanic is already assigned to this center.");
+        }
+        if (mechanic.employedAtCenterId && mechanic.employedAtCenterId !== centerId) {
+            const currentCenterName = mechanic.employedAtCenter?.name || "another workshop center";
+            throw new AppError(
+                status.CONFLICT,
+                `This mechanic is already assigned to "${currentCenterName}". A mechanic cannot be assigned to multiple centers simultaneously.`
+            );
         }
         const updatedMechanic = await prisma.user.update({
             where: { id: mechanicId },
@@ -358,10 +374,20 @@ const addMechanicToCenter = async (centerId: string, adminId: string, payload: a
         const mechanicPassword = password || "Mechanic@123";
         const resetUrl = `${envVars.FRONTEND_URL}/set-password?email=${encodeURIComponent(email)}&temp=${encodeURIComponent(mechanicPassword)}`;
 
-        const existingUser = await prisma.user.findUnique({ where: { email } });
+        const existingUser = await prisma.user.findUnique({
+            where: { email },
+            include: { employedAtCenter: true }
+        });
         if (existingUser) {
             if (existingUser.employedAtCenterId === centerId) {
                 throw new AppError(status.BAD_REQUEST, "User is already a mechanic at this center.");
+            }
+            if (existingUser.employedAtCenterId && existingUser.employedAtCenterId !== centerId) {
+                const currentCenterName = existingUser.employedAtCenter?.name || "another workshop center";
+                throw new AppError(
+                    status.CONFLICT,
+                    `This mechanic is already assigned to "${currentCenterName}". A mechanic cannot be assigned to multiple centers simultaneously.`
+                );
             }
             const updated = await prisma.user.update({
                 where: { id: existingUser.id },
@@ -467,6 +493,32 @@ const verifyCenter = async (id: string, isApproved: boolean) => {
     });
 };
 
+const removeMechanicFromCenter = async (centerId: string, adminId: string, mechanicId: string) => {
+    const center = await prisma.automotiveCenter.findUnique({ where: { id: centerId } });
+    if (!center) throw new AppError(status.NOT_FOUND, "Automotive Center not found.");
+
+    const user = await prisma.user.findUnique({ where: { id: adminId } });
+    if (user?.role !== Role.ADMIN && center.adminId !== adminId) {
+        throw new AppError(status.FORBIDDEN, "You are not authorized to update this center.");
+    }
+
+    const mechanic = await prisma.user.findUnique({ where: { id: mechanicId } });
+    if (!mechanic) throw new AppError(status.NOT_FOUND, "Mechanic not found.");
+
+    if (mechanic.employedAtCenterId !== centerId) {
+        throw new AppError(status.BAD_REQUEST, "This mechanic is not assigned to this center.");
+    }
+
+    const updatedMechanic = await prisma.user.update({
+        where: { id: mechanicId },
+        data: {
+            employedAtCenterId: null
+        }
+    });
+
+    return updatedMechanic;
+};
+
 const deleteCenter = async (id: string) => {
     const center = await prisma.automotiveCenter.findUnique({ where: { id } });
     if (!center) throw new AppError(status.NOT_FOUND, "Automotive Center not found.");
@@ -482,6 +534,7 @@ export const AutomotiveCenterService = {
     getCenterById,
     updateCenter,
     addMechanicToCenter,
+    removeMechanicFromCenter,
     verifyCenter,
     deleteCenter
 };

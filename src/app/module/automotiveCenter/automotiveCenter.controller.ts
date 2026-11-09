@@ -132,6 +132,20 @@ const addMechanicToCenter = catchAsync(async (req: AppRequest, res: AppResponse)
     });
 });
 
+const removeMechanicFromCenter = catchAsync(async (req: AppRequest, res: AppResponse) => {
+    const { id, mechanicId } = req.params;
+    const adminId = req.user.userId;
+    
+    const result = await AutomotiveCenterService.removeMechanicFromCenter(id as string, adminId, mechanicId as string);
+
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: "Mechanic removed from center successfully",
+        data: result
+    });
+});
+
 const verifyCenter = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const { id } = req.params;
     const { isApproved } = req.body;
@@ -163,6 +177,7 @@ export const AutomotiveCenterController = {
     getCenterById,
     updateCenter,
     addMechanicToCenter,
+    removeMechanicFromCenter,
     verifyCenter,
     deleteCenter
 };
