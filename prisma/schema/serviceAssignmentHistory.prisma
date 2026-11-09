@@ -1,0 +1,16 @@
+model ServiceAssignmentHistory {
+  id               String         @id @default(uuid())
+  serviceRequestId String
+  serviceRequest   ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  mechanicId       String
+  mechanic         User           @relation("MechanicAssignmentHistory", fields: [mechanicId], references: [id])
+  assignedById     String
+  assignedBy       User           @relation("OwnerAssignmentHistory", fields: [assignedById], references: [id])
+  status           String         // "ASSIGNED", "REASSIGNED", "COMPLETED", "REWORK_REQUESTED"
+  notes            String?
+  assignedAt       DateTime       @default(now())
+
+  @@index([serviceRequestId])
+  @@index([mechanicId])
+  @@index([assignedById])
+}

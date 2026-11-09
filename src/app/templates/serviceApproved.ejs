@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Service Approved & Ready - Jatra</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f5; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="100%" max-width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <tr>
+                        <td style="background-color: #0f172a; padding: 30px; text-align: center; border-bottom: 4px solid #10b981;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 900;">JATRA</h1>
+                            <p style="color: #34d399; margin: 6px 0 0 0; font-size: 13px; text-transform: uppercase; font-weight: 700;">Service Approved & Ready</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 36px;">
+                            <h2 style="margin: 0 0 14px 0; font-size: 18px; color: #0f172a;">Hello <%= customerName %>,</h2>
+                            <p style="margin: 0 0 20px 0; font-size: 14px; color: #475569; line-height: 1.6;">
+                                Great news! The workshop manager at <strong><%= centerName %></strong> has verified and approved the completed service for your vehicle <strong><%= vehicleInfo %></strong>.
+                            </p>
+
+                            <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+                                <p style="margin: 0 0 6px 0; font-size: 12px; color: #15803d; font-weight: 700; text-transform: uppercase;">Service Completed</p>
+                                <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 800; color: #166534;"><%= serviceName %></p>
+                                <p style="margin: 0; font-size: 12px; color: #15803d;">Your car is tuned, inspected, and ready for pickup.</p>
+                            </div>
+
+                            <p style="font-size: 13px; color: #475569; line-height: 1.5;">
+                                How was your experience? Please take a moment to rate the service and review the workshop to help our automotive community.
+                            </p>
+
+                            <div style="text-align: center; margin: 26px 0;">
+                                <a href="<%= reviewUrl %>" style="display: inline-block; background-color: #0f172a; color: #ffffff; font-size: 13px; font-weight: 800; text-transform: uppercase; text-decoration: none; padding: 13px 30px; border-radius: 6px;">
+                                    View Details & Leave Review &rarr;
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

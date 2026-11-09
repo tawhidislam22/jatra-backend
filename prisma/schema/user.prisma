@@ -31,6 +31,11 @@ model User {
 
   employedAtCenterId String?
   employedAtCenter   AutomotiveCenter? @relation("CenterMechanics", fields: [employedAtCenterId], references: [id])
+  isAvailable        Boolean           @default(true) // For mechanics availability status
+
+  // Assignment History
+  mechanicAssignments ServiceAssignmentHistory[] @relation("MechanicAssignmentHistory")
+  createdAssignments  ServiceAssignmentHistory[] @relation("OwnerAssignmentHistory")
 
   // Communication & Notifications
   conversationsAsP1 Conversation[] @relation("ConversationParticipant1")

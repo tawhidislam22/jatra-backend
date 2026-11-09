@@ -1,0 +1,16 @@
+model EmailLog {
+  id               String          @id @default(uuid())
+  recipient        String
+  subject          String
+  template         String
+  status           String          @default("SENT") // "SENT", "FAILED"
+  error            String?
+  dedupKey         String?         @unique
+  serviceRequestId String?
+  serviceRequest   ServiceRequest? @relation(fields: [serviceRequestId], references: [id], onDelete: SetNull)
+  createdAt        DateTime        @default(now())
+
+  @@index([recipient])
+  @@index([serviceRequestId])
+  @@index([createdAt])
+}

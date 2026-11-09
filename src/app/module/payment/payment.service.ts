@@ -107,10 +107,46 @@ const fulfillCheckoutSession = async (sessionId: string) => {
         }
         // Update Service Request if applicable
         if (payment.serviceRequestId) {
-            await prisma.serviceRequest.update({
+            const updatedService = await prisma.serviceRequest.update({
                 where: { id: payment.serviceRequestId },
-                data: { status: 'ACCEPTED' as any }
+                data: { status: 'ACCEPTED' as any },
+                include: { center: true, customer: true, vehicle: true }
             });
+
+            if (updatedService) {
+                try {
+                    const { ServiceRequestEmailService } = await import("../serviceRequest/serviceRequestEmail.service.js");
+                    const { NotificationService } = await import("../notification/notification.service.js");
+
+                    // Customer notification
+                    await NotificationService.createNotification({
+                        userId: updatedService.customerId,
+                        title: "Booking Confirmed & Paid",
+                        message: `Your booking for ${updatedService.serviceName || "Car Service"} at ${updatedService.center.name} is confirmed.`,
+                        type: "SERVICE",
+                        link: "/dashboard/service-requests"
+                    });
+
+                    // Owner notification
+                    await NotificationService.createNotification({
+                        userId: updatedService.center.adminId,
+                        title: "New Confirmed Booking",
+                        message: `${updatedService.customer.fullName || updatedService.customer.name} booked ${updatedService.serviceName || "Car Service"} for ${new Date(updatedService.scheduledDate).toLocaleDateString()}. Please assign a mechanic.`,
+                        type: "SERVICE",
+                        link: "/owner/dashboard/service-requests"
+                    });
+
+                    // Email to customer
+                    await ServiceRequestEmailService.sendBookingConfirmation(
+                        updatedService,
+                        updatedService.customer,
+                        updatedService.center,
+                        updatedService.vehicle
+                    );
+                } catch (confirmErr) {
+                    console.error("Failed to send confirmation notifications/email for service request:", confirmErr);
+                }
+            }
         }
 
         // Send Invoice Email (swallow error so it doesn't crash the fulfillment if SMTP is misconfigured)

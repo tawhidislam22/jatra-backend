@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Booking Confirmed - Jatra Automotive</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-font-smoothing: antialiased;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f5; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="100%" max-width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <tr>
+                        <td style="background-color: #0f172a; padding: 32px 30px; text-align: center; border-bottom: 4px solid #f59e0b;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">JATRA</h1>
+                            <p style="color: #f59e0b; margin: 6px 0 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Service Booking Confirmed</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 36px 36px 24px 36px;">
+                            <h2 style="margin: 0 0 14px 0; font-size: 20px; color: #0f172a; font-weight: 800;">Hello <%= customerName %>,</h2>
+                            <p style="margin: 0 0 20px 0; font-size: 14px; color: #475569; line-height: 1.6;">
+                                Your workshop booking has been successfully paid and confirmed at <strong><%= centerName %></strong>. Details of your scheduled appointment:
+                            </p>
+
+                            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                                <table width="100%" cellpadding="6" cellspacing="0" style="font-size: 13px; color: #334155;">
+                                    <tr>
+                                        <td style="font-weight: 700; color: #64748b; text-transform: uppercase; font-size: 11px;">Booking ID</td>
+                                        <td style="font-family: monospace; font-weight: 700; color: #0f172a;"><%= bookingId %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: 700; color: #64748b; text-transform: uppercase; font-size: 11px;">Service</td>
+                                        <td style="font-weight: 700; color: #0f172a;"><%= serviceName %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: 700; color: #64748b; text-transform: uppercase; font-size: 11px;">Vehicle</td>
+                                        <td><%= vehicleInfo %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: 700; color: #64748b; text-transform: uppercase; font-size: 11px;">Scheduled Time</td>
+                                        <td style="font-weight: 700; color: #0f172a;"><%= scheduledDate %></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: 700; color: #64748b; text-transform: uppercase; font-size: 11px;">Est. Duration</td>
+                                        <td><%= estimatedDuration %> minutes</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: 700; color: #64748b; text-transform: uppercase; font-size: 11px;">Amount Paid</td>
+                                        <td style="font-weight: 800; color: #16a34a;">$<%= totalAmount.toFixed(2) %> (USD)</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: 700; color: #64748b; text-transform: uppercase; font-size: 11px;">Center Address</td>
+                                        <td><%= centerAddress %></td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div style="text-align: center; margin: 28px 0;">
+                                <a href="<%= dashboardUrl %>" style="display: inline-block; background-color: #0f172a; color: #ffffff; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; text-decoration: none; padding: 14px 32px; border-radius: 6px;">
+                                    Track In Dashboard &rarr;
+                                </a>
+                            </div>
+
+                            <p style="margin: 0; font-size: 12px; color: #94a3b8; text-align: center;">
+                                You can message the workshop host directly anytime through your Messages tab.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color: #f1f5f9; padding: 20px; text-align: center; font-size: 11px; color: #94a3b8;">
+                            &copy; <%= new Date().getFullYear() %> Jatra Mobility Ltd. All rights reserved.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

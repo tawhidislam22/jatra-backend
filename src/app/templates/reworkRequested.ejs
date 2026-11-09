@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Service Rework Notice - Jatra</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f5; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="100%" max-width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <tr>
+                        <td style="background-color: #0f172a; padding: 30px; text-align: center; border-bottom: 4px solid #f59e0b;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 900;">JATRA</h1>
+                            <p style="color: #fbbf24; margin: 6px 0 0 0; font-size: 13px; text-transform: uppercase; font-weight: 700;">Service Quality Review - Rework Required</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 36px;">
+                            <h2 style="margin: 0 0 14px 0; font-size: 18px; color: #0f172a;">Hello <%= recipientName %>,</h2>
+                            <p style="margin: 0 0 20px 0; font-size: 14px; color: #475569; line-height: 1.6;">
+                                During quality inspection for <strong><%= vehicleInfo %></strong> (Job #<%= bookingId.slice(0, 8) %>), the workshop manager identified items requiring further attention before final release.
+                            </p>
+
+                            <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+                                <p style="margin: 0 0 6px 0; font-size: 12px; color: #92400e; font-weight: 700; text-transform: uppercase;">Manager Notes & Required Action</p>
+                                <p style="margin: 0; font-size: 14px; color: #78350f; line-height: 1.5; font-weight: 500;"><%= reworkNotes %></p>
+                            </div>
+
+                            <p style="font-size: 13px; color: #64748b; line-height: 1.5;">
+                                Our priority is ensuring factory-grade safety and reliability. Please visit your dashboard for updated status and details.
+                            </p>
+
+                            <div style="text-align: center; margin: 26px 0;">
+                                <a href="<%= dashboardUrl %>" style="display: inline-block; background-color: #b45309; color: #ffffff; font-size: 13px; font-weight: 800; text-transform: uppercase; text-decoration: none; padding: 13px 30px; border-radius: 6px;">
+                                    View Service Details &rarr;
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

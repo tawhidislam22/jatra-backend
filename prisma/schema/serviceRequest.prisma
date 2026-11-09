@@ -1,9 +1,16 @@
 model ServiceRequest {
   id               String        @id @default(uuid())
-  serviceType      ServiceType
+  serviceType      ServiceType   @default(WORKSHOP)
+  serviceName      String?       // Specific package e.g. "Engine Repair", "Oil Change", etc.
   scheduledDate    DateTime
-  issueDescription String
+  issueDescription String?       // Optional customer notes
+  problemImages    String[]      // Mandatory: at least one uploaded photo showing issue
+  completionImages String[]      // Mandatory on mechanic completion: at least one photo
+  reworkNotes      String?       // Owner notes if rework is requested
+  estimatedDuration Int          @default(60) // Duration in minutes
+  totalAmount      Float         @default(0)  // Total service price
   status           RequestStatus @default(PENDING)
+  approvedAt       DateTime?
 
   // Relations
   customerId String
@@ -17,10 +24,13 @@ model ServiceRequest {
   payment    Payment?
   review     Review?
   conversations Conversation[]
+  assignmentHistory ServiceAssignmentHistory[]
+  emailLogs    EmailLog[]
 
   @@index([customerId])
   @@index([centerId])
   @@index([mechanicId])
   @@index([vehicleId])
   @@index([status])
+  @@index([scheduledDate])
 }
