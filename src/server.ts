@@ -13,7 +13,7 @@ const bootstrap = async() => {
     }   
 }
 
-if (process.env.NODE_ENV !== 'production') {
+if (!process.env.VERCEL) {
     bootstrap();
 }
 
@@ -72,7 +72,3 @@ process.on("unhandledRejection", (error) => {
 
     process.exit(1);
 })
-
-//unhandled rejection handler
-
-bootstrap();
