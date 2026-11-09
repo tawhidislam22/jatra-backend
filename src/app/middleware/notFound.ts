@@ -1,5 +1,5 @@
 import status from "http-status";
-import { AppRequest, AppResponse } from "../interfaces/http.interface";
+import { AppRequest, AppResponse } from "../interfaces/http.interface.js";
 
 export const notFound = (req: AppRequest, res: AppResponse) => {
     res.status(status.NOT_FOUND).json({

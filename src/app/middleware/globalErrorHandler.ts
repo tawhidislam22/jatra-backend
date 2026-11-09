@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import status from "http-status";
 import z from "zod";
-import { Prisma } from "../../generated/prisma/client";
-import { envVars } from "../config/env";
-import AppError from "../errorHelpers/AppError";
+import { Prisma } from "../../generated/prisma/client.js";
+import { envVars } from "../config/env.js";
+import AppError from "../errorHelpers/AppError.js";
 import { handlePrismaClientKnownRequestError,
       handlePrismaClientUnknownError,
        handlePrismaClientValidationError,
        handlerPrismaClientInitializationError, 
-       handlerPrismaClientRustPanicError } from "../errorHelpers/handlePrismaErrors";
-import { handleZodError } from "../errorHelpers/handleZodError";
-import { TErrorResponse, TErrorSources } from "../interfaces/error.interface";
-import { AppNextFunction, AppRequest, AppResponse } from "../interfaces/http.interface";
-import { deleteUploadedFilesFromGlobalErrorHandler } from "../utils/deleteUploadedFilesFromGlobalErrorHandler";
+       handlerPrismaClientRustPanicError } from "../errorHelpers/handlePrismaErrors.js";
+import { handleZodError } from "../errorHelpers/handleZodError.js";
+import { TErrorResponse, TErrorSources } from "../interfaces/error.interface.js";
+import { AppNextFunction, AppRequest, AppResponse } from "../interfaces/http.interface.js";
+import { deleteUploadedFilesFromGlobalErrorHandler } from "../utils/deleteUploadedFilesFromGlobalErrorHandler.js";
 
 
 

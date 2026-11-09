@@ -1,7 +1,7 @@
-import { AppRequest, AppResponse } from "../../interfaces/http.interface";
-import { catchAsync } from "../../shared/catchAsync";
-import { RentalBookingService } from "./rentalBooking.service";
-import { sendResponse } from "../../shared/sendResponse";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface.js";
+import { catchAsync } from "../../shared/catchAsync.js";
+import { RentalBookingService } from "./rentalBooking.service.js";
+import { sendResponse } from "../../shared/sendResponse.js";
 import status from "http-status";
 
 const createBooking = catchAsync(async (req: AppRequest, res: AppResponse) => {

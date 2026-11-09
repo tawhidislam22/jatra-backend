@@ -1,8 +1,8 @@
-import { AppRequest, AppResponse } from "../../interfaces/http.interface";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface.js";
 import status from "http-status";
-import { catchAsync } from "../../shared/catchAsync";
-import { sendResponse } from "../../shared/sendResponse";
-import { UserService } from "./user.service";
+import { catchAsync } from "../../shared/catchAsync.js";
+import { sendResponse } from "../../shared/sendResponse.js";
+import { UserService } from "./user.service.js";
 
 const getAllUsers = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await UserService.getAllUsers(req.query as any);

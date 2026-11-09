@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { deleteFileFromCloudinary } from "../config/cloudinary.config";
-import { AppRequest } from "../interfaces/http.interface";
+import { deleteFileFromCloudinary } from "../config/cloudinary.config.js";
+import { AppRequest } from "../interfaces/http.interface.js";
 
 export const deleteUploadedFilesFromGlobalErrorHandler = async (req: AppRequest) => {
     try {

@@ -1,7 +1,7 @@
-import { AppRequest, AppResponse } from "../../interfaces/http.interface";
-import { catchAsync } from "../../shared/catchAsync";
-import { PaymentService } from "./payment.service";
-import { sendResponse } from "../../shared/sendResponse";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface.js";
+import { catchAsync } from "../../shared/catchAsync.js";
+import { PaymentService } from "./payment.service.js";
+import { sendResponse } from "../../shared/sendResponse.js";
 import status from "http-status";
 
 const createCheckoutSession = catchAsync(async (req: AppRequest, res: AppResponse) => {

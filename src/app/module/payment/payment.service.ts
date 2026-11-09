@@ -1,10 +1,10 @@
 import status from "http-status";
-import AppError from "../../errorHelpers/AppError";
-import { prisma } from "../../lib/prisma";
+import AppError from "../../errorHelpers/AppError.js";
+import { prisma } from "../../lib/prisma.js";
 import Stripe from "stripe";
-import { envVars } from "../../config/env";
-import { PaymentStatus } from "../../constants/prismaEnums";
-import { ICreateCheckoutSessionRequest } from "./payment.interface";
+import { envVars } from "../../config/env.js";
+import { PaymentStatus } from "../../constants/prismaEnums.js";
+import { ICreateCheckoutSessionRequest } from "./payment.interface.js";
 
 let stripeClient: Stripe | null = null;
 
@@ -117,8 +117,8 @@ const fulfillCheckoutSession = async (sessionId: string) => {
 
         // Send Invoice Email (swallow error so it doesn't crash the fulfillment if SMTP is misconfigured)
         try {
-            const { sendEmail } = await import("../../utils/email");
-            const { generateInvoicePdf } = await import("../../utils/pdfGenerator");
+            const { sendEmail } = await import("../../utils/email.js");
+            const { generateInvoicePdf } = await import("../../utils/pdfGenerator.js");
             const invoiceNumber = `INV-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
             
             const templateData = {

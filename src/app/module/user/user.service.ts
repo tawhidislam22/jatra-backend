@@ -1,8 +1,8 @@
 import status from "http-status";
-import AppError from "../../errorHelpers/AppError";
-import { prisma } from "../../lib/prisma";
-import { Role, UserStatus, RequestStatus, VehicleType } from "../../constants/prismaEnums";
-import { IUserFilterQuery } from "./user.interface";
+import AppError from "../../errorHelpers/AppError.js";
+import { prisma } from "../../lib/prisma.js";
+import { Role, UserStatus, RequestStatus, VehicleType } from "../../constants/prismaEnums.js";
+import { IUserFilterQuery } from "./user.interface.js";
 
 const getAllUsers = async (query: IUserFilterQuery) => {
     const { role, status: userStatus, searchTerm, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc' } = query;

@@ -1,8 +1,8 @@
 import status from "http-status";
-import AppError from "../../errorHelpers/AppError";
-import { prisma } from "../../lib/prisma";
-import { Role, RequestStatus, VehicleType } from "../../constants/prismaEnums";
-import { ICreateBookingRequest, IUpdateBookingStatusRequest } from "./rentalBooking.interface";
+import AppError from "../../errorHelpers/AppError.js";
+import { prisma } from "../../lib/prisma.js";
+import { Role, RequestStatus, VehicleType } from "../../constants/prismaEnums.js";
+import { ICreateBookingRequest, IUpdateBookingStatusRequest } from "./rentalBooking.interface.js";
 
 const createBooking = async (userId: string, payload: ICreateBookingRequest) => {
     // Verify vehicle exists and is a rental fleet vehicle

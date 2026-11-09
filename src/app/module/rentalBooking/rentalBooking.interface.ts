@@ -1,4 +1,4 @@
-import { RequestStatus } from "../../constants/prismaEnums";
+import { RequestStatus } from "../../constants/prismaEnums.js";
 
 export interface ICreateBookingRequest {
     vehicleId: string;

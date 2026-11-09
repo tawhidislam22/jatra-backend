@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { checkAuth } from "../../middleware/checkAuth";
-import { Role } from "../../constants/prismaEnums";
-import { validateRequest } from "../../middleware/validateRequest";
-import { VehicleValidation } from "./vehicle.validation";
-import { VehicleController } from "./vehicle.controller";
+import { checkAuth } from "../../middleware/checkAuth.js";
+import { Role } from "../../constants/prismaEnums.js";
+import { validateRequest } from "../../middleware/validateRequest.js";
+import { VehicleValidation } from "./vehicle.validation.js";
+import { VehicleController } from "./vehicle.controller.js";
 
 const router = Router();
 
-import { multerUpload } from "../../config/multer.config";
+import { multerUpload } from "../../config/multer.config.js";
 
 // Register a vehicle (Customer or Admin)
 router.post(

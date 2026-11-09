@@ -1,8 +1,8 @@
 import status from "http-status";
-import AppError from "../../errorHelpers/AppError";
-import { prisma } from "../../lib/prisma";
-import { Role, RequestStatus } from "../../constants/prismaEnums";
-import { IRequestAssistanceRequest, IUpdateEmergencyStatusRequest } from "./emergencyAssistance.interface";
+import AppError from "../../errorHelpers/AppError.js";
+import { prisma } from "../../lib/prisma.js";
+import { Role, RequestStatus } from "../../constants/prismaEnums.js";
+import { IRequestAssistanceRequest, IUpdateEmergencyStatusRequest } from "./emergencyAssistance.interface.js";
 
 const requestAssistance = async (userId: string, payload: IRequestAssistanceRequest) => {
     return await prisma.emergencyAssistance.create({

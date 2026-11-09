@@ -1,8 +1,8 @@
-import { AppRequest, AppResponse } from "../../interfaces/http.interface";
-import { catchAsync } from "../../shared/catchAsync";
-import { AutomotiveCenterService } from "./automotiveCenter.service";
-import { sendResponse } from "../../shared/sendResponse";
-import { tokenUtils } from "../../utils/token";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface.js";
+import { catchAsync } from "../../shared/catchAsync.js";
+import { AutomotiveCenterService } from "./automotiveCenter.service.js";
+import { sendResponse } from "../../shared/sendResponse.js";
+import { tokenUtils } from "../../utils/token.js";
 import status from "http-status";
 
 const createCenter = catchAsync(async (req: AppRequest, res: AppResponse) => {

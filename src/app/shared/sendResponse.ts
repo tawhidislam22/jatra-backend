@@ -1,4 +1,4 @@
-import { AppResponse } from "../interfaces/http.interface";
+import { AppResponse } from "../interfaces/http.interface.js";
 
 interface IResponseData<T> {
     httpStatusCode: number;

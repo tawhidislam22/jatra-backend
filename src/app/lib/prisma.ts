@@ -1,8 +1,8 @@
 import "dotenv/config";
 import pg from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../../generated/prisma/client";
-import { envVars } from "../config/env";
+import { PrismaClient } from "../../generated/prisma/client.js";
+import { envVars } from "../config/env.js";
 
 // Ensure connection string uses sslmode=verify-full to prevent pg-connection-string security warning
 const formatConnectionString = (url: string): string => {

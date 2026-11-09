@@ -1,5 +1,5 @@
 import z from "zod";
-import { AppNextFunction, AppRequest, AppResponse } from "../interfaces/http.interface";
+import { AppNextFunction, AppRequest, AppResponse } from "../interfaces/http.interface.js";
 
 export const validateRequest = (zodSchema: z.ZodTypeAny) => {
     return (req: AppRequest, res: AppResponse, next: AppNextFunction) => {

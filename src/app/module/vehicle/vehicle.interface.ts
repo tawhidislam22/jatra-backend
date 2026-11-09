@@ -1,4 +1,4 @@
-import { VehicleType } from "../../constants/prismaEnums";
+import { VehicleType } from "../../constants/prismaEnums.js";
 
 export interface IRegisterVehicleRequest {
     make: string;

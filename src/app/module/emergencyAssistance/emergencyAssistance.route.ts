@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { checkAuth } from "../../middleware/checkAuth";
-import { Role } from "../../constants/prismaEnums";
-import { validateRequest } from "../../middleware/validateRequest";
-import { EmergencyAssistanceValidation } from "./emergencyAssistance.validation";
-import { EmergencyAssistanceController } from "./emergencyAssistance.controller";
+import { checkAuth } from "../../middleware/checkAuth.js";
+import { Role } from "../../constants/prismaEnums.js";
+import { validateRequest } from "../../middleware/validateRequest.js";
+import { EmergencyAssistanceValidation } from "./emergencyAssistance.validation.js";
+import { EmergencyAssistanceController } from "./emergencyAssistance.controller.js";
 
 const router = Router();
 

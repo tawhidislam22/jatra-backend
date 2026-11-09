@@ -1,7 +1,7 @@
 import status from "http-status";
-import AppError from "../../errorHelpers/AppError";
-import { prisma } from "../../lib/prisma";
-import { ICreateReviewRequest } from "./review.interface";
+import AppError from "../../errorHelpers/AppError.js";
+import { prisma } from "../../lib/prisma.js";
+import { ICreateReviewRequest } from "./review.interface.js";
 
 const createReview = async (userId: string, payload: ICreateReviewRequest) => {
     // Basic validation to ensure they are reviewing a valid center

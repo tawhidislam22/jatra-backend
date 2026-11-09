@@ -1,12 +1,12 @@
 import status from "http-status";
-import AppError from "../../errorHelpers/AppError";
-import { prisma } from "../../lib/prisma";
-import { Role, UserStatus } from "../../constants/prismaEnums";
-import { auth } from "../../lib/auth";
-import { ICreateCenterRequest, IUpdateCenterRequest } from "./automotiveCenter.interface";
-import { QueryBuilder } from "../../utils/QueryBuilder";
-import { sendEmail } from "../../utils/email";
-import { envVars } from "../../config/env";
+import AppError from "../../errorHelpers/AppError.js";
+import { prisma } from "../../lib/prisma.js";
+import { Role, UserStatus } from "../../constants/prismaEnums.js";
+import { auth } from "../../lib/auth.js";
+import { ICreateCenterRequest, IUpdateCenterRequest } from "./automotiveCenter.interface.js";
+import { QueryBuilder } from "../../utils/QueryBuilder.js";
+import { sendEmail } from "../../utils/email.js";
+import { envVars } from "../../config/env.js";
 
 const createCenter = async (userId: string, payload: ICreateCenterRequest) => {
     const result = await prisma.$transaction(async (tx) => {

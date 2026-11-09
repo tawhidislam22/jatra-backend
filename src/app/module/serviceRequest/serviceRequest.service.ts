@@ -1,8 +1,8 @@
 import status from "http-status";
-import AppError from "../../errorHelpers/AppError";
-import { prisma } from "../../lib/prisma";
-import { Role, RequestStatus } from "../../constants/prismaEnums";
-import { ICreateServiceRequest, IUpdateServiceRequestStatus } from "./serviceRequest.interface";
+import AppError from "../../errorHelpers/AppError.js";
+import { prisma } from "../../lib/prisma.js";
+import { Role, RequestStatus } from "../../constants/prismaEnums.js";
+import { ICreateServiceRequest, IUpdateServiceRequestStatus } from "./serviceRequest.interface.js";
 
 const createRequest = async (userId: string, payload: ICreateServiceRequest) => {
     // Verify vehicle belongs to user if CUSTOMER

@@ -1,5 +1,5 @@
 import z from "zod";
-import { VehicleType } from "../../constants/prismaEnums";
+import { VehicleType } from "../../constants/prismaEnums.js";
 
 export const VehicleValidation = {
     registerVehicle: z.object({

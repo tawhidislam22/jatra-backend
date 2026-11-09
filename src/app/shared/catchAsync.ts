@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AppNextFunction, AppRequest, AppResponse } from "../interfaces/http.interface";
+import { AppNextFunction, AppRequest, AppResponse } from "../interfaces/http.interface.js";
 
 type AsyncRequestHandler = (req: AppRequest, res: AppResponse, next: AppNextFunction) => unknown | Promise<unknown>;
 

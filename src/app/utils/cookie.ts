@@ -1,4 +1,4 @@
-import { AppRequest, AppResponse } from "../interfaces/http.interface";
+import { AppRequest, AppResponse } from "../interfaces/http.interface.js";
 
 type CookieOptions = Record<string, any>;
 

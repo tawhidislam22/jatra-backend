@@ -1,8 +1,8 @@
 import status from "http-status";
-import AppError from "../../errorHelpers/AppError";
-import { prisma } from "../../lib/prisma";
-import { Role, VehicleType } from "../../constants/prismaEnums";
-import { IRegisterVehicleRequest, IUpdateVehicleRequest, IVehicleFilterQuery } from "./vehicle.interface";
+import AppError from "../../errorHelpers/AppError.js";
+import { prisma } from "../../lib/prisma.js";
+import { Role, VehicleType } from "../../constants/prismaEnums.js";
+import { IRegisterVehicleRequest, IUpdateVehicleRequest, IVehicleFilterQuery } from "./vehicle.interface.js";
 
 const registerVehicle = async (user: any, payload: IRegisterVehicleRequest) => {
     // If the user is CUSTOMER, they can only register CUSTOMER_OWNED
@@ -41,7 +41,7 @@ const registerVehicle = async (user: any, payload: IRegisterVehicleRequest) => {
     });
 };
 
-import { QueryBuilder } from "../../utils/QueryBuilder";
+import { QueryBuilder } from "../../utils/QueryBuilder.js";
 
 const getAllVehicles = async (query: any) => {
     const vehicleQuery = new QueryBuilder(prisma.vehicle as any, query, {

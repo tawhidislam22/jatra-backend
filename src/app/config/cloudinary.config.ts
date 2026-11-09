@@ -1,7 +1,7 @@
 
 
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
-import AppError from '../errorHelpers/AppError';
+import AppError from '../errorHelpers/AppError.js';
 import status from 'http-status';
 
 

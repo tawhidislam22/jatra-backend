@@ -1,6 +1,6 @@
 import { Server } from "http";
-import app from "./app";
-import { envVars } from "./app/config/env";
+import app from "./app.js";
+import { envVars } from "./app/config/env.js";
 
 let server : Server;
 const bootstrap = async() => {

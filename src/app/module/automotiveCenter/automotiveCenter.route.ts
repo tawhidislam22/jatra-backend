@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { checkAuth } from "../../middleware/checkAuth";
-import { Role } from "../../constants/prismaEnums";
-import { validateRequest } from "../../middleware/validateRequest";
-import { AutomotiveCenterValidation } from "./automotiveCenter.validation";
-import { AutomotiveCenterController } from "./automotiveCenter.controller";
-import { multerUpload } from "../../config/multer.config";
+import { checkAuth } from "../../middleware/checkAuth.js";
+import { Role } from "../../constants/prismaEnums.js";
+import { validateRequest } from "../../middleware/validateRequest.js";
+import { AutomotiveCenterValidation } from "./automotiveCenter.validation.js";
+import { AutomotiveCenterController } from "./automotiveCenter.controller.js";
+import { multerUpload } from "../../config/multer.config.js";
 
 const router = Router();
 

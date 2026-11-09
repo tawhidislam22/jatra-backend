@@ -1,4 +1,4 @@
-import { ServiceType, RequestStatus } from "../../constants/prismaEnums";
+import { ServiceType, RequestStatus } from "../../constants/prismaEnums.js";
 
 export interface ICreateServiceRequest {
     serviceType: ServiceType;

@@ -1,14 +1,14 @@
-import { AppRequest, AppResponse } from "../../interfaces/http.interface";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface.js";
 import status from "http-status";
 import ms, { StringValue } from "ms";
-import { envVars } from "../../config/env";
-import AppError from "../../errorHelpers/AppError";
-import { auth } from "../../lib/auth";
-import { catchAsync } from "../../shared/catchAsync";
-import { sendResponse } from "../../shared/sendResponse";
-import { CookieUtils } from "../../utils/cookie";
-import { tokenUtils } from "../../utils/token";
-import { AuthService } from "./auth.service";
+import { envVars } from "../../config/env.js";
+import AppError from "../../errorHelpers/AppError.js";
+import { auth } from "../../lib/auth.js";
+import { catchAsync } from "../../shared/catchAsync.js";
+import { sendResponse } from "../../shared/sendResponse.js";
+import { CookieUtils } from "../../utils/cookie.js";
+import { tokenUtils } from "../../utils/token.js";
+import { AuthService } from "./auth.service.js";
 
 const getSafeRedirectPath = (redirectPath?: string) => {
     if (!redirectPath) {

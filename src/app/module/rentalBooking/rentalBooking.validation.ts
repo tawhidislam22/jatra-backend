@@ -1,5 +1,5 @@
 import z from "zod";
-import { RequestStatus } from "../../constants/prismaEnums";
+import { RequestStatus } from "../../constants/prismaEnums.js";
 
 export const RentalBookingValidation = {
     createBooking: z.object({
