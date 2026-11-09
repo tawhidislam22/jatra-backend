@@ -4,7 +4,6 @@ import { prisma } from "../../lib/prisma.js";
 import { Role, UserStatus } from "../../constants/prismaEnums.js";
 import { auth } from "../../lib/auth.js";
 import { ICreateCenterRequest, IUpdateCenterRequest } from "./automotiveCenter.interface.js";
-import { QueryBuilder } from "../../utils/QueryBuilder.js";
 import { sendEmail } from "../../utils/email.js";
 import { envVars } from "../../config/env.js";
 
@@ -30,27 +29,143 @@ const createCenter = async (userId: string, payload: ICreateCenterRequest) => {
 };
 
 const getAllCenters = async (query: any) => {
-    const centerQuery = new QueryBuilder(prisma.automotiveCenter as any, query, {
-        searchableFields: ['name', 'address'],
-        filterableFields: ['isApproved', 'rating', 'adminId']
-    })
-        .search()
-        .filter()
-        .sort()
-        .paginate()
-        .fields()
-        .include({ admin: true, mechanics: true });
+    const isPublic = !query.adminId;
+    const whereConditions: any = {};
 
-    return await centerQuery.execute();
+    if (isPublic) {
+        whereConditions.isApproved = true;
+        // Public route: ONLY show centers that currently have at least one active, non-deleted, available mechanic
+        whereConditions.mechanics = {
+            some: {
+                status: UserStatus.ACTIVE,
+                isDeleted: false,
+                isAvailable: true
+            }
+        };
+    } else if (query.adminId) {
+        whereConditions.adminId = query.adminId;
+    }
+
+    if (query.searchTerm) {
+        whereConditions.OR = [
+            { name: { contains: query.searchTerm, mode: 'insensitive' } },
+            { address: { contains: query.searchTerm, mode: 'insensitive' } }
+        ];
+    }
+
+    if (query.rating) {
+        whereConditions.rating = { gte: Number(query.rating) };
+    }
+
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const sortBy = query.sortBy || 'rating';
+    const sortOrder = query.sortOrder || 'desc';
+
+    const [centers, totalCount] = await Promise.all([
+        prisma.automotiveCenter.findMany({
+            where: whereConditions,
+            skip,
+            take: limit,
+            orderBy: { [sortBy]: sortOrder },
+            include: {
+                admin: true,
+                mechanics: {
+                    where: {
+                        status: UserStatus.ACTIVE,
+                        isDeleted: false,
+                        isAvailable: true
+                    }
+                }
+            }
+        }),
+        prisma.automotiveCenter.count({ where: whereConditions })
+    ]);
+
+    if (isPublic) {
+        const { ServiceRequestService } = await import("../serviceRequest/serviceRequest.service.js");
+        const todayStr = (query.date as string) || new Date().toISOString().split("T")[0];
+
+        // Recalculate real-time free slots and filter out centers where all mechanics are busy during this time
+        const populatedCenters = await Promise.all(
+            centers.map(async (center) => {
+                try {
+                    const avail = await ServiceRequestService.getCenterAvailability(center.id, todayStr);
+                    const openSlots = avail.slots.filter(s => s.available);
+                    if (openSlots.length === 0) {
+                        return null; // All mechanics are busy or no free slots available
+                    }
+                    return {
+                        ...center,
+                        totalMechanicsCount: avail.totalMechanicsCount,
+                        freeSlotsCount: openSlots.length,
+                        nextFreeSlot: openSlots[0]?.time || null,
+                        availableSlots: openSlots.map(s => s.time)
+                    };
+                } catch {
+                    return null;
+                }
+            })
+        );
+
+        const availableOnly = populatedCenters.filter(Boolean);
+
+        return {
+            meta: {
+                page,
+                limit,
+                total: availableOnly.length,
+                totalPages: Math.ceil(availableOnly.length / limit) || 1
+            },
+            data: availableOnly
+        };
+    }
+
+    return {
+        meta: {
+            page,
+            limit,
+            total: totalCount,
+            totalPages: Math.ceil(totalCount / limit) || 1
+        },
+        data: centers
+    };
 };
 
 const getCenterById = async (id: string) => {
     const center = await prisma.automotiveCenter.findUnique({
         where: { id },
-        include: { mechanics: true, rentalFleet: true, reviews: true, admin: true }
+        include: {
+            mechanics: {
+                where: {
+                    status: UserStatus.ACTIVE,
+                    isDeleted: false
+                }
+            },
+            rentalFleet: true,
+            reviews: true,
+            admin: true
+        }
     });
     if (!center) throw new AppError(status.NOT_FOUND, "Automotive Center not found.");
-    return center;
+
+    try {
+        const { ServiceRequestService } = await import("../serviceRequest/serviceRequest.service.js");
+        const todayStr = new Date().toISOString().split("T")[0];
+        const avail = await ServiceRequestService.getCenterAvailability(center.id, todayStr);
+        const openSlots = avail.slots.filter(s => s.available);
+        return {
+            ...center,
+            totalMechanicsCount: avail.totalMechanicsCount,
+            freeSlotsCount: openSlots.length,
+            nextFreeSlot: openSlots[0]?.time || null,
+            availableSlots: openSlots.map(s => s.time)
+        };
+    } catch {
+        return center;
+    }
 };
 
 const updateCenter = async (id: string, adminId: string, payload: IUpdateCenterRequest) => {
@@ -89,7 +204,9 @@ const addMechanicToCenter = async (centerId: string, adminId: string, payload: a
             where: { id: mechanicId },
             data: {
                 role: Role.MECHANIC,
-                employedAtCenterId: centerId
+                employedAtCenterId: centerId,
+                isAvailable: true,
+                status: UserStatus.ACTIVE
             }
         });
 
@@ -135,7 +252,8 @@ const addMechanicToCenter = async (centerId: string, adminId: string, payload: a
                     role: Role.MECHANIC,
                     employedAtCenterId: centerId,
                     needPasswordChange: true,
-                    status: UserStatus.ACTIVE
+                    status: UserStatus.ACTIVE,
+                    isAvailable: true
                 },
                 include: {
                     employedAtCenter: true
@@ -188,7 +306,8 @@ const addMechanicToCenter = async (centerId: string, adminId: string, payload: a
                 emailVerified: true,
                 needPasswordChange: true,
                 employedAtCenterId: centerId,
-                status: UserStatus.ACTIVE
+                status: UserStatus.ACTIVE,
+                isAvailable: true
             },
             include: {
                 employedAtCenter: true
