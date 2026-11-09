@@ -1,6 +1,4 @@
 import dotenv from "dotenv"
-import AppError from "../errorHelpers/AppError";
-import status from "http-status";
 
 dotenv.config()
 
@@ -42,80 +40,52 @@ interface EnvConfig{
 
 }
 
+const env = (key: string, fallback = ""): string => {
+    const value = process.env[key];
+    if (value) return value;
+
+    if (process.env.NODE_ENV === "production") {
+        console.warn(`Missing environment variable: ${key}`);
+    }
+
+    return fallback;
+}
+
 const loadEnvVariables=():EnvConfig=>{
-    const requireEnvVariables=[
-        'NODE_ENV',
-        'PORT',
-        'DATABASE_URL',
-        'BETTER_AUTH_SECRET',
-        'BETTER_AUTH_URL',
-        'ACCESS_TOKEN_SECRET',
-        'REFRESH_TOKEN_SECRET',
-        'ACCESS_TOKEN_EXPIRES_IN',
-        'REFRESH_TOKEN_EXPIRES_IN',
-        'BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN',
-        'BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE',
-        'EMAIL_SENDER_SMTP_USER',
-        'EMAIL_SENDER_SMTP_PASS',
-        'EMAIL_SENDER_SMTP_HOST',
-        'EMAIL_SENDER_SMTP_PORT',
-        'EMAIL_SENDER_SMTP_FROM',
-        'GOOGLE_CLIENT_ID',
-        'GOOGLE_CLIENT_SECRET',
-        'GOOGLE_CALLBACK_URL',
-        'FRONTEND_URL',
-        'CLOUDINARY_CLOUD_NAME',
-        'CLOUDINARY_API_KEY',
-        'CLOUDINARY_API_SECRET',
-        'STRIPE_SECRET_KEY',
-        'STRIPE_WEBHOOK_SECRET',
-        'SUPER_ADMIN_EMAIL',
-        'SUPER_ADMIN_PASSWORD'
-
-    ]
-
-    requireEnvVariables.forEach((variables)=>{
-        if(!process.env[variables]){
-            //throw new Error(`this variable not available in the env file`)
-
-            throw new AppError(status.INTERNAL_SERVER_ERROR,`this variable ${variables} not available in the env file`)
-        }
-    })
-
     return{
-        NODE_ENV:process.env.NODE_ENV as string,
-        PORT:process.env.PORT as string,
-        DATABASE_URL: process.env.DATABASE_URL as string,
-        BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET as string,
-        BETTER_AUTH_URL: process.env.BETTER_AUTH_URL as string,
-        ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET as string,
-        REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET as string,
-        ACCESS_TOKEN_EXPIRES_IN: process.env.ACCESS_TOKEN_EXPIRES_IN as string,
-        BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN: process.env.BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN as string,
-        BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE: process.env.BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE as string,
+        NODE_ENV: env("NODE_ENV", "development"),
+        PORT: env("PORT", "5000"),
+        DATABASE_URL: env("DATABASE_URL", "postgresql://localhost:5432/jatra"),
+        BETTER_AUTH_SECRET: env("BETTER_AUTH_SECRET", "missing-better-auth-secret-change-me"),
+        BETTER_AUTH_URL: env("BETTER_AUTH_URL", "http://localhost:5000"),
+        ACCESS_TOKEN_SECRET: env("ACCESS_TOKEN_SECRET", "missing-access-token-secret-change-me"),
+        REFRESH_TOKEN_SECRET: env("REFRESH_TOKEN_SECRET", "missing-refresh-token-secret-change-me"),
+        ACCESS_TOKEN_EXPIRES_IN: env("ACCESS_TOKEN_EXPIRES_IN", "1d"),
+        BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN: env("BETTER_AUTH_SESSION_TOKEN_EXPIRES_IN", "86400"),
+        BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE: env("BETTER_AUTH_SESSION_TOKEN_UPDATE_AGE", "86400"),
         EMAIL_SENDER: {
-            SMTP_USER: process.env.EMAIL_SENDER_SMTP_USER as string,
-            SMTP_PASS: process.env.EMAIL_SENDER_SMTP_PASS as string,
-            SMTP_HOST: process.env.EMAIL_SENDER_SMTP_HOST as string,
-            SMTP_PORT: process.env.EMAIL_SENDER_SMTP_PORT as string,
-            SMTP_FROM: process.env.EMAIL_SENDER_SMTP_FROM as string,
+            SMTP_USER: env("EMAIL_SENDER_SMTP_USER"),
+            SMTP_PASS: env("EMAIL_SENDER_SMTP_PASS"),
+            SMTP_HOST: env("EMAIL_SENDER_SMTP_HOST", "smtp.gmail.com"),
+            SMTP_PORT: env("EMAIL_SENDER_SMTP_PORT", "465"),
+            SMTP_FROM: env("EMAIL_SENDER_SMTP_FROM"),
         },
-        REFRESH_TOKEN_EXPIRES_IN: process.env.REFRESH_TOKEN_EXPIRES_IN as string,
-        GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
-        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
-        GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL as string,
-        FRONTEND_URL: process.env.FRONTEND_URL as string,
+        REFRESH_TOKEN_EXPIRES_IN: env("REFRESH_TOKEN_EXPIRES_IN", "7d"),
+        GOOGLE_CLIENT_ID: env("GOOGLE_CLIENT_ID"),
+        GOOGLE_CLIENT_SECRET: env("GOOGLE_CLIENT_SECRET"),
+        GOOGLE_CALLBACK_URL: env("GOOGLE_CALLBACK_URL"),
+        FRONTEND_URL: env("FRONTEND_URL", "http://localhost:3000"),
         CLOUDINARY: {
-            CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
-            CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
-            CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
+            CLOUDINARY_CLOUD_NAME: env("CLOUDINARY_CLOUD_NAME"),
+            CLOUDINARY_API_KEY: env("CLOUDINARY_API_KEY"),
+            CLOUDINARY_API_SECRET: env("CLOUDINARY_API_SECRET"),
         },
         STRIPE: {
-            STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
-            STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
+            STRIPE_SECRET_KEY: env("STRIPE_SECRET_KEY"),
+            STRIPE_WEBHOOK_SECRET: env("STRIPE_WEBHOOK_SECRET"),
         },
-        SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL as string,
-        SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD as string,
+        SUPER_ADMIN_EMAIL: env("SUPER_ADMIN_EMAIL"),
+        SUPER_ADMIN_PASSWORD: env("SUPER_ADMIN_PASSWORD"),
         
         
     }

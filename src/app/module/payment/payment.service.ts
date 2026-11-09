@@ -6,9 +6,21 @@ import { envVars } from "../../config/env";
 import { PaymentStatus } from "../../constants/prismaEnums";
 import { ICreateCheckoutSessionRequest } from "./payment.interface";
 
-const stripe = new Stripe(envVars.STRIPE.STRIPE_SECRET_KEY as string, {
-    apiVersion: "2026-06-24.dahlia" as any,
-});
+let stripeClient: Stripe | null = null;
+
+const getStripe = () => {
+    if (!envVars.STRIPE.STRIPE_SECRET_KEY) {
+        throw new AppError(status.INTERNAL_SERVER_ERROR, "Stripe secret key is not configured.");
+    }
+
+    if (!stripeClient) {
+        stripeClient = new Stripe(envVars.STRIPE.STRIPE_SECRET_KEY, {
+            apiVersion: "2026-06-24.dahlia" as any,
+        });
+    }
+
+    return stripeClient;
+};
 
 const createCheckoutSession = async (userId: string, payload: ICreateCheckoutSessionRequest) => {
     const metadata: Record<string, string> = { userId };
@@ -17,6 +29,7 @@ const createCheckoutSession = async (userId: string, payload: ICreateCheckoutSes
     if (payload.emergencyId) metadata.emergencyId = String(payload.emergencyId);
 
     // Basic setup for Stripe session
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
@@ -57,6 +70,7 @@ const handleStripeWebhookEvent = async (payload: any, sig: string) => {
     let event;
 
     try {
+        const stripe = getStripe();
         event = stripe.webhooks.constructEvent(payload, sig, envVars.STRIPE.STRIPE_WEBHOOK_SECRET as string);
     } catch (err: any) {
         throw new AppError(status.BAD_REQUEST, `Webhook Error: ${err.message}`);
@@ -140,6 +154,7 @@ const fulfillCheckoutSession = async (sessionId: string) => {
 };
 
 const verifyPayment = async (sessionId: string) => {
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     if (session.payment_status === 'paid') {
         await fulfillCheckoutSession(sessionId);
