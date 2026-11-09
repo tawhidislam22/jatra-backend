@@ -3,6 +3,7 @@ import pg from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../../generated/prisma/client.js";
 import { envVars } from "../config/env.js";
+import { recordDbQuery } from "./perfStorage.js";
 
 // Ensure connection string uses sslmode=verify-full to prevent pg-connection-string security warning
 const formatConnectionString = (url: string): string => {
@@ -33,11 +34,27 @@ if (process.env.NODE_ENV !== "production") {
 
 const adapter = new PrismaPg(pool);
 
-export const prisma = globalForPrisma.prisma || new PrismaClient({
+const basePrisma = globalForPrisma.prisma || new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
 });
 
+export const prisma = (basePrisma.$extends({
+    query: {
+        $allModels: {
+            async $allOperations({ model, operation, args, query }: any) {
+                const start = performance.now();
+                try {
+                    return await query(args);
+                } finally {
+                    const duration = performance.now() - start;
+                    recordDbQuery(model, operation, duration);
+                }
+            }
+        }
+    }
+}) as unknown) as PrismaClient;
+
 if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = prisma;
+    globalForPrisma.prisma = basePrisma;
 }

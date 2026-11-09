@@ -26,4 +26,5 @@ model AutomotiveCenter {
   @@index([adminId])
   @@index([isApproved])
   @@index([rating])
+  @@index([isApproved, rating(sort: Desc)])
 }

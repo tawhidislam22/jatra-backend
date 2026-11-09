@@ -8,6 +8,44 @@ import { prisma } from "../lib/prisma.js";
 import { CookieUtils } from "../utils/cookie.js";
 import { jwtUtils } from "../utils/jwt.js";
 
+// In-memory short-lived auth cache (30s TTL) to eliminate repetitive DB queries on rapid API calls
+interface CachedUser {
+    user: any;
+    expiresAt: number;
+}
+const userAuthCache = new Map<string, CachedUser>();
+
+export const clearAuthCache = (userId?: string) => {
+    if (userId) {
+        userAuthCache.delete(userId);
+    } else {
+        userAuthCache.clear();
+    }
+};
+
+const getCachedUser = (userId: string) => {
+    const cached = userAuthCache.get(userId);
+    if (!cached) return null;
+    if (Date.now() > cached.expiresAt) {
+        userAuthCache.delete(userId);
+        return null;
+    }
+    return cached.user;
+};
+
+const setCachedUser = (userId: string, user: any) => {
+    if (userAuthCache.size > 1000) {
+        const now = Date.now();
+        for (const [key, val] of userAuthCache.entries()) {
+            if (val.expiresAt < now) userAuthCache.delete(key);
+        }
+    }
+    userAuthCache.set(userId, {
+        user,
+        expiresAt: Date.now() + 30 * 1000
+    });
+};
+
 export const checkAuth = (...authRoles: Role[]) => async (req: AppRequest, res: AppResponse, next: AppNextFunction) => {
     try {
         let user: any = null;
@@ -57,11 +95,18 @@ export const checkAuth = (...authRoles: Role[]) => async (req: AppRequest, res: 
             if (accessToken) {
                 const verifiedToken = jwtUtils.verifyToken(accessToken, envVars.ACCESS_TOKEN_SECRET);
                 if (verifiedToken.success && verifiedToken.data?.userId) {
-                    const dbUser = await prisma.user.findUnique({
-                        where: { id: verifiedToken.data.userId }
-                    });
-                    if (dbUser) {
-                        user = dbUser;
+                    const userId = verifiedToken.data.userId;
+                    const cached = getCachedUser(userId);
+                    if (cached) {
+                        user = cached;
+                    } else {
+                        const dbUser = await prisma.user.findUnique({
+                            where: { id: userId }
+                        });
+                        if (dbUser) {
+                            user = dbUser;
+                            setCachedUser(userId, dbUser);
+                        }
                     }
                 }
             }

@@ -150,54 +150,45 @@ const deleteUser = async (id: string) => {
 
 const getAdminOverviewStats = async () => {
     const [
-        totalUsers,
-        totalCustomers,
-        totalOwners,
-        totalMechanics,
-        totalAdmins,
-        activeUsers,
-        blockedUsers,
-        totalCenters,
-        approvedCenters,
-        pendingCenters,
-        totalVehicles,
-        rentalVehicles,
-        customerVehicles,
-        totalServiceRequests,
-        pendingServices,
-        inProgressServices,
-        completedServices,
-        totalBookings,
+        userRoles,
+        userStatuses,
+        centerStats,
+        vehicleTypes,
+        serviceStatuses,
         bookingAggregate,
-        totalPayments,
         paymentAggregate,
         recentUsers,
         recentPendingCenters,
         recentBookings
     ] = await Promise.all([
-        prisma.user.count({ where: { isDeleted: false } }),
-        prisma.user.count({ where: { role: Role.CUSTOMER, isDeleted: false } }),
-        prisma.user.count({ where: { role: Role.OWNER, isDeleted: false } }),
-        prisma.user.count({ where: { role: Role.MECHANIC, isDeleted: false } }),
-        prisma.user.count({ where: { role: Role.ADMIN, isDeleted: false } }),
-        prisma.user.count({ where: { status: UserStatus.ACTIVE, isDeleted: false } }),
-        prisma.user.count({ where: { status: UserStatus.BLOCKED, isDeleted: false } }),
-        prisma.automotiveCenter.count(),
-        prisma.automotiveCenter.count({ where: { isApproved: true } }),
-        prisma.automotiveCenter.count({ where: { isApproved: false } }),
-        prisma.vehicle.count(),
-        prisma.vehicle.count({ where: { type: VehicleType.RENTAL_FLEET } }),
-        prisma.vehicle.count({ where: { type: VehicleType.CUSTOMER_OWNED } }),
-        prisma.serviceRequest.count(),
-        prisma.serviceRequest.count({ where: { status: RequestStatus.PENDING } }),
-        prisma.serviceRequest.count({ where: { status: RequestStatus.IN_PROGRESS } }),
-        prisma.serviceRequest.count({ where: { status: RequestStatus.COMPLETED } }),
-        prisma.rentalBooking.count(),
+        prisma.user.groupBy({
+            by: ['role'],
+            where: { isDeleted: false },
+            _count: { id: true }
+        }),
+        prisma.user.groupBy({
+            by: ['status'],
+            where: { isDeleted: false },
+            _count: { id: true }
+        }),
+        prisma.automotiveCenter.groupBy({
+            by: ['isApproved'],
+            _count: { id: true }
+        }),
+        prisma.vehicle.groupBy({
+            by: ['type'],
+            _count: { id: true }
+        }),
+        prisma.serviceRequest.groupBy({
+            by: ['status'],
+            _count: { id: true }
+        }),
         prisma.rentalBooking.aggregate({
+            _count: { id: true },
             _sum: { totalAmount: true }
         }),
-        prisma.payment.count(),
         prisma.payment.aggregate({
+            _count: { id: true },
             _sum: { amount: true }
         }),
         prisma.user.findMany({
@@ -219,17 +210,59 @@ const getAdminOverviewStats = async () => {
         })
     ]);
 
+    // Parse aggregated groups in memory with zero overhead
+    const roleCounts: Record<string, number> = {};
+    let totalUsers = 0;
+    for (const item of userRoles) {
+        roleCounts[item.role] = item._count.id;
+        totalUsers += item._count.id;
+    }
+
+    const statusCounts: Record<string, number> = {};
+    for (const item of userStatuses) {
+        statusCounts[item.status] = item._count.id;
+    }
+
+    let totalCenters = 0;
+    let approvedCenters = 0;
+    let pendingCenters = 0;
+    for (const item of centerStats) {
+        totalCenters += item._count.id;
+        if (item.isApproved) approvedCenters += item._count.id;
+        else pendingCenters += item._count.id;
+    }
+
+    let totalVehicles = 0;
+    let rentalVehicles = 0;
+    let customerVehicles = 0;
+    for (const item of vehicleTypes) {
+        totalVehicles += item._count.id;
+        if (item.type === VehicleType.RENTAL_FLEET) rentalVehicles += item._count.id;
+        else if (item.type === VehicleType.CUSTOMER_OWNED) customerVehicles += item._count.id;
+    }
+
+    let totalServiceRequests = 0;
+    let pendingServices = 0;
+    let inProgressServices = 0;
+    let completedServices = 0;
+    for (const item of serviceStatuses) {
+        totalServiceRequests += item._count.id;
+        if (item.status === RequestStatus.PENDING) pendingServices += item._count.id;
+        else if (item.status === RequestStatus.IN_PROGRESS) inProgressServices += item._count.id;
+        else if (item.status === RequestStatus.COMPLETED) completedServices += item._count.id;
+    }
+
     const totalRevenue = (paymentAggregate._sum.amount || 0) + (bookingAggregate._sum.totalAmount || 0);
 
     return {
         users: {
             total: totalUsers,
-            customers: totalCustomers,
-            owners: totalOwners,
-            mechanics: totalMechanics,
-            admins: totalAdmins,
-            active: activeUsers,
-            blocked: blockedUsers
+            customers: roleCounts[Role.CUSTOMER] || 0,
+            owners: roleCounts[Role.OWNER] || 0,
+            mechanics: roleCounts[Role.MECHANIC] || 0,
+            admins: roleCounts[Role.ADMIN] || 0,
+            active: statusCounts[UserStatus.ACTIVE] || 0,
+            blocked: statusCounts[UserStatus.BLOCKED] || 0
         },
         centers: {
             total: totalCenters,
@@ -248,9 +281,9 @@ const getAdminOverviewStats = async () => {
             completed: completedServices
         },
         financials: {
-            totalBookings,
+            totalBookings: bookingAggregate._count.id || 0,
             totalBookingsGross: bookingAggregate._sum.totalAmount || 0,
-            totalPayments,
+            totalPayments: paymentAggregate._count.id || 0,
             totalPaymentsVolume: paymentAggregate._sum.amount || 0,
             grossPlatformVolume: totalRevenue,
             estimatedPlatformRevenue: totalRevenue * 0.10 // 10% platform take rate

@@ -2,6 +2,7 @@ import { toNodeHandler } from "better-auth/node";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import compression from "compression";
 import path from "path";
 import qs from "qs";
 import { envVars } from "./app/config/env.js";
@@ -11,6 +12,7 @@ import { globalErrorHandler } from "./app/middleware/globalErrorHandler.js";
 import { notFound } from "./app/middleware/notFound.js";
 import { IndexRoutes } from "./app/routes/index.js";
 import { PaymentController } from "./app/module/payment/payment.controller.js";
+import { perfLoggerMiddleware } from "./app/middleware/perfLogger.js";
 
 const app = express() as any;
 app.set("query parser", (str : string) => qs.parse(str));
@@ -54,16 +56,15 @@ const corsOptions: cors.CorsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(compression());
+app.use(perfLoggerMiddleware);
 
 app.all(["/api/auth", "/api/auth/*path"], toNodeHandler(auth));
 
-// Enable URL-encoded form data parsing
-app.use(express.urlencoded({ extended: true }));
-
-// Middleware to parse JSON bodies
-app.use(express.json());
+// Middleware to parse request bodies
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use("/api/v1", IndexRoutes);
 

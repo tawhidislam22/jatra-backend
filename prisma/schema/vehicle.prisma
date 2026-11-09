@@ -26,4 +26,6 @@ model Vehicle {
   @@index([centerId])
   @@index([type])
   @@index([isAvailable])
+  @@index([isAvailable, type, pricePerDay])
+  @@index([centerId, isAvailable])
 }

@@ -13,6 +13,9 @@ model WishlistItem {
   createdAt DateTime         @default(now())
 
   @@index([userId])
+  @@index([userId, itemType])
+  @@index([userId, vehicleId])
+  @@index([userId, centerId])
   @@index([vehicleId])
   @@index([centerId])
 }

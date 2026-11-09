@@ -162,7 +162,7 @@ async function main() {
         licensePlate: 'DHA-PA-99-8877',
         type: 'RENTAL_FLEET',
         pricePerDay: 60,
-        isAvailable: false,
+        isAvailable: true,
         features: ['Manual', 'Petrol'],
         centerId: center2.id,
         images: ['https://demo.xpeedstudio.com/carrental/onepage-v4/wp-content/uploads/sites/9/2020/07/image6.png'],
@@ -239,7 +239,7 @@ async function main() {
       licensePlate: `DHA-GA-${10 + i}-${1000 + i}`,
       type: 'RENTAL_FLEET',
       pricePerDay: 40 + Math.floor(Math.random() * 60),
-      isAvailable: Math.random() > 0.3,
+      isAvailable: true,
       features: ['AC', 'Automatic', 'Bluetooth', 'GPS'].slice(0, 2 + Math.floor(Math.random() * 2)),
       centerId: extraCenters[i % extraCenters.length].id, // Assign evenly across the new centers
       images: [image],

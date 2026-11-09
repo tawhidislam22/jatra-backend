@@ -71,7 +71,39 @@ const getMyVehicles = catchAsync(async (req: AppRequest, res: AppResponse) => {
 
 const updateVehicle = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const id = req.params.id as string;
-    const result = await VehicleService.updateVehicle(id, req.user, req.body);
+    let payload = { ...req.body };
+    if (payload.data && typeof payload.data === 'string') {
+        try {
+            payload = { ...JSON.parse(payload.data), ...payload };
+            delete payload.data;
+        } catch {
+            // keep as is
+        }
+    }
+    if (req.file) {
+        payload.images = [req.file.path];
+    } else if (typeof payload.images === 'string') {
+        try {
+            payload.images = JSON.parse(payload.images);
+        } catch {
+            payload.images = [payload.images];
+        }
+    }
+    if (typeof payload.year === 'string') {
+        payload.year = parseInt(payload.year, 10);
+    }
+    if (typeof payload.pricePerDay === 'string') {
+        payload.pricePerDay = parseFloat(payload.pricePerDay);
+    }
+    if (typeof payload.features === 'string') {
+        try {
+            payload.features = JSON.parse(payload.features);
+        } catch {
+            payload.features = payload.features.split(',').map((f: string) => f.trim()).filter(Boolean);
+        }
+    }
+
+    const result = await VehicleService.updateVehicle(id, req.user, payload);
 
     sendResponse(res, {
         httpStatusCode: status.OK,

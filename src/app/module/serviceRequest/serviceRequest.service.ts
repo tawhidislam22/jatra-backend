@@ -310,6 +310,90 @@ const createRequest = async (userId: string, payload: ICreateServiceRequest, pro
 };
 
 /**
+ * Lean projections for service requests to prevent over-fetching sensitive columns and huge joins
+ */
+const serviceRequestSelect = {
+    vehicle: {
+        select: {
+            id: true,
+            make: true,
+            model: true,
+            year: true,
+            licensePlate: true,
+            images: true,
+            type: true
+        }
+    },
+    customer: {
+        select: {
+            id: true,
+            name: true,
+            fullName: true,
+            email: true,
+            phone: true,
+            image: true
+        }
+    },
+    center: {
+        select: {
+            id: true,
+            name: true,
+            address: true,
+            phone: true,
+            adminId: true
+        }
+    },
+    mechanic: {
+        select: {
+            id: true,
+            name: true,
+            fullName: true,
+            phone: true,
+            image: true
+        }
+    },
+    payment: {
+        select: {
+            id: true,
+            amount: true,
+            status: true,
+            transactionId: true,
+            paidAt: true
+        }
+    },
+    review: {
+        select: {
+            id: true,
+            rating: true,
+            comment: true
+        }
+    },
+    assignmentHistory: {
+        select: {
+            id: true,
+            status: true,
+            notes: true,
+            assignedAt: true,
+            mechanic: {
+                select: {
+                    id: true,
+                    name: true,
+                    fullName: true
+                }
+            },
+            assignedBy: {
+                select: {
+                    id: true,
+                    name: true,
+                    fullName: true
+                }
+            }
+        },
+        orderBy: { assignedAt: "desc" as const }
+    }
+};
+
+/**
  * Get service requests with role-based filtering
  */
 const getRequests = async (user: any) => {
@@ -317,32 +401,15 @@ const getRequests = async (user: any) => {
 
     if (user.role === Role.CUSTOMER) {
         whereClause.customerId = user.userId;
-    } else if (user.role === Role.OWNER || user.role === Role.ADMIN) {
-        const centers = await prisma.automotiveCenter.findMany({ where: { adminId: user.userId } });
-        if (centers.length === 0) {
-            if (user.role === Role.ADMIN) {
-                return await prisma.serviceRequest.findMany({
-                    where: {},
-                    include: {
-                        vehicle: true,
-                        customer: true,
-                        center: true,
-                        mechanic: true,
-                        payment: true,
-                        review: true,
-                        assignmentHistory: {
-                            include: { mechanic: true, assignedBy: true },
-                            orderBy: { assignedAt: "desc" }
-                        }
-                    },
-                    orderBy: { scheduledDate: "desc" }
-                });
-            }
-            return [];
-        }
-        whereClause.centerId = { in: centers.map(c => c.id) };
+    } else if (user.role === Role.OWNER) {
+        whereClause.center = { adminId: user.userId };
+    } else if (user.role === Role.ADMIN) {
+        whereClause = {};
     } else if (user.role === Role.MECHANIC) {
-        const dbMechanic = await prisma.user.findUnique({ where: { id: user.userId } });
+        const dbMechanic = await prisma.user.findUnique({
+            where: { id: user.userId },
+            select: { employedAtCenterId: true }
+        });
         if (dbMechanic?.employedAtCenterId) {
             whereClause = {
                 OR: [
@@ -357,18 +424,7 @@ const getRequests = async (user: any) => {
 
     return await prisma.serviceRequest.findMany({
         where: whereClause,
-        include: {
-            vehicle: true,
-            customer: true,
-            center: true,
-            mechanic: true,
-            payment: true,
-            review: true,
-            assignmentHistory: {
-                include: { mechanic: true, assignedBy: true },
-                orderBy: { assignedAt: "desc" }
-            }
-        },
+        include: serviceRequestSelect,
         orderBy: { scheduledDate: "desc" }
     });
 };
@@ -471,6 +527,17 @@ const startWork = async (id: string, mechanicId: string) => {
 
     if (request.mechanicId !== mechanicId) {
         throw new AppError(status.FORBIDDEN, "You are not the assigned mechanic for this job.");
+    }
+
+    const now = new Date();
+    const scheduledTime = new Date(request.scheduledDate);
+    if (now < scheduledTime) {
+        const timeStr = scheduledTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dateStr = scheduledTime.toLocaleDateString();
+        throw new AppError(
+            status.BAD_REQUEST,
+            `You cannot start this job before its scheduled appointment time (${dateStr} at ${timeStr}).`
+        );
     }
 
     const updated = await prisma.$transaction(async (tx) => {

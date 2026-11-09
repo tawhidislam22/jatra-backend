@@ -26,6 +26,7 @@ export const VehicleValidation = {
             isAvailable: z.union([z.boolean(), z.string()]).optional().transform(val => typeof val === 'string' ? val === 'true' : val),
             features: z.union([z.array(z.string()), z.string()]).optional(),
             images: z.union([z.array(z.string()), z.string()]).optional(),
+            data: z.string().optional(),
         })
     })
 };

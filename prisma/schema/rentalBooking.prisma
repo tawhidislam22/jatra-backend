@@ -26,4 +26,6 @@ model RentalBooking {
   @@index([vehicleId])
   @@index([status])
   @@index([pickupDate, returnDate])
+  @@index([customerId, status, pickupDate])
+  @@index([vehicleId, status, pickupDate, returnDate])
 }

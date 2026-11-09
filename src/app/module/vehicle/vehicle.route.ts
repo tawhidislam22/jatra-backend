@@ -4,10 +4,9 @@ import { Role } from "../../constants/prismaEnums.js";
 import { validateRequest } from "../../middleware/validateRequest.js";
 import { VehicleValidation } from "./vehicle.validation.js";
 import { VehicleController } from "./vehicle.controller.js";
+import { multerUpload } from "../../config/multer.config.js";
 
 const router = Router();
-
-import { multerUpload } from "../../config/multer.config.js";
 
 // Register a vehicle (Customer or Admin)
 router.post(
@@ -31,6 +30,7 @@ router.get('/:id', VehicleController.getVehicleById);
 router.patch(
     '/:id', 
     checkAuth(Role.CUSTOMER, Role.OWNER), 
+    multerUpload.single('image'),
     validateRequest(VehicleValidation.updateVehicle),
     VehicleController.updateVehicle
 );

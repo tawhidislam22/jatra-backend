@@ -8,6 +8,42 @@ import { NotificationService } from "../notification/notification.service.js";
 import { CancellationService } from "../cancellation/cancellation.service.js";
 
 /**
+ * Automatically synchronizes rental bookings whose ending time (returnDate) has passed.
+ * - PENDING bookings past their returnDate are automatically CANCELLED (expired).
+ * - ACCEPTED / IN_PROGRESS bookings past their returnDate are automatically marked COMPLETED.
+ */
+const syncExpiredRentalBookings = async () => {
+    try {
+        const now = new Date();
+
+        // 1. Mark unconfirmed PENDING bookings as CANCELLED once their returnDate has passed
+        await prisma.rentalBooking.updateMany({
+            where: {
+                status: RequestStatus.PENDING,
+                returnDate: { lte: now }
+            },
+            data: {
+                status: RequestStatus.CANCELLED,
+                cancellationReason: "Booking reservation expired automatically after return date passed."
+            }
+        });
+
+        // 2. Mark active rental bookings as COMPLETED once returnDate has passed
+        await prisma.rentalBooking.updateMany({
+            where: {
+                status: { in: [RequestStatus.ACCEPTED, RequestStatus.IN_PROGRESS] },
+                returnDate: { lte: now }
+            },
+            data: {
+                status: RequestStatus.COMPLETED
+            }
+        });
+    } catch (syncErr) {
+        console.error("Error synchronizing expired rental bookings:", syncErr);
+    }
+};
+
+/**
  * Checks if a vehicle is available for the given date range [pickupDate, returnDate)
  * Overlap formula: existingPickup < newReturn && existingReturn > newPickup
  * Cancelled bookings do NOT block availability.
@@ -18,6 +54,8 @@ const checkVehicleAvailability = async (
     returnDate: Date,
     excludeBookingId?: string
 ) => {
+    await syncExpiredRentalBookings();
+
     const conflicting = await prisma.rentalBooking.findFirst({
         where: {
             vehicleId,
@@ -35,10 +73,14 @@ const checkVehicleAvailability = async (
  * Returns all active booked date ranges for a vehicle (for frontend calendar rendering)
  */
 const getVehicleAvailability = async (vehicleId: string) => {
+    await syncExpiredRentalBookings();
+
+    const now = new Date();
     const activeBookings = await prisma.rentalBooking.findMany({
         where: {
             vehicleId,
-            status: { in: [RequestStatus.ACCEPTED, RequestStatus.IN_PROGRESS, RequestStatus.PENDING] }
+            status: { in: [RequestStatus.ACCEPTED, RequestStatus.IN_PROGRESS, RequestStatus.PENDING] },
+            returnDate: { gt: now }
         },
         select: {
             id: true,
@@ -186,44 +228,69 @@ const createBooking = async (userId: string, payload: ICreateBookingRequest) => 
     return booking;
 };
 
+const bookingSelect = {
+    vehicle: {
+        select: {
+            id: true,
+            make: true,
+            model: true,
+            year: true,
+            licensePlate: true,
+            images: true,
+            pricePerDay: true,
+            type: true,
+            center: {
+                select: {
+                    id: true,
+                    name: true,
+                    address: true,
+                    phone: true
+                }
+            }
+        }
+    },
+    customer: {
+        select: {
+            id: true,
+            name: true,
+            fullName: true,
+            email: true,
+            phone: true,
+            image: true
+        }
+    },
+    payment: {
+        select: {
+            id: true,
+            amount: true,
+            status: true,
+            transactionId: true,
+            paidAt: true
+        }
+    },
+    cancellationRecord: true
+};
+
 const getBookings = async (user: any) => {
+    await syncExpiredRentalBookings();
+
     if (user.role === Role.CUSTOMER) {
         return await prisma.rentalBooking.findMany({
             where: { customerId: user.userId },
-            include: {
-                vehicle: { include: { center: true } },
-                payment: true,
-                cancellationRecord: true
-            },
+            include: bookingSelect,
             orderBy: { pickupDate: "desc" }
         });
-    } else if (user.role === Role.OWNER || user.role === Role.ADMIN) {
-        const centers = await prisma.automotiveCenter.findMany({ where: { adminId: user.userId } });
-        if (centers.length === 0) {
-            if (user.role === Role.ADMIN) {
-                return await prisma.rentalBooking.findMany({
-                    include: {
-                        vehicle: { include: { center: true } },
-                        customer: true,
-                        payment: true,
-                        cancellationRecord: true
-                    },
-                    orderBy: { pickupDate: "desc" }
-                });
-            }
-            return [];
-        }
-
+    } else if (user.role === Role.OWNER) {
         return await prisma.rentalBooking.findMany({
             where: {
-                vehicle: { centerId: { in: centers.map((c) => c.id) } }
+                vehicle: { center: { adminId: user.userId } }
             },
-            include: {
-                vehicle: { include: { center: true } },
-                customer: true,
-                payment: true,
-                cancellationRecord: true
-            },
+            include: bookingSelect,
+            orderBy: { pickupDate: "desc" }
+        });
+    } else if (user.role === Role.ADMIN) {
+        return await prisma.rentalBooking.findMany({
+            include: bookingSelect,
             orderBy: { pickupDate: "desc" }
         });
     }
@@ -266,6 +333,7 @@ const cancelBooking = async (id: string, user: any, payload: ICancelBookingReque
 };
 
 export const RentalBookingService = {
+    syncExpiredRentalBookings,
     checkVehicleAvailability,
     getVehicleAvailability,
     createBooking,

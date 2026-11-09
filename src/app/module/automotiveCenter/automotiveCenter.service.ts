@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError.js";
 import { prisma } from "../../lib/prisma.js";
-import { Role, UserStatus } from "../../constants/prismaEnums.js";
+import { Role, UserStatus, RequestStatus } from "../../constants/prismaEnums.js";
 import { auth } from "../../lib/auth.js";
 import { ICreateCenterRequest, IUpdateCenterRequest } from "./automotiveCenter.interface.js";
 import { sendEmail } from "../../utils/email.js";
@@ -75,11 +76,25 @@ const getAllCenters = async (query: any) => {
             take: limit,
             orderBy: { [sortBy]: sortOrder },
             include: {
-                admin: true,
+                admin: {
+                    select: {
+                        id: true,
+                        name: true,
+                        fullName: true,
+                        phone: true,
+                        email: true
+                    }
+                },
                 mechanics: {
                     where: {
                         status: UserStatus.ACTIVE,
                         isDeleted: false,
+                        isAvailable: true
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        fullName: true,
                         isAvailable: true
                     }
                 }
@@ -89,30 +104,83 @@ const getAllCenters = async (query: any) => {
     ]);
 
     if (isPublic) {
-        const { ServiceRequestService } = await import("../serviceRequest/serviceRequest.service.js");
         const todayStr = (query.date as string) || new Date().toISOString().split("T")[0];
+        const targetDate = new Date(todayStr);
+        const dayStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0);
+        const dayEnd = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 23, 59, 59);
 
-        // Recalculate real-time free slots and filter out centers where all mechanics are busy during this time
-        const populatedCenters = await Promise.all(
-            centers.map(async (center) => {
-                try {
-                    const avail = await ServiceRequestService.getCenterAvailability(center.id, todayStr);
-                    const openSlots = avail.slots.filter(s => s.available);
-                    if (openSlots.length === 0) {
-                        return null; // All mechanics are busy or no free slots available
-                    }
-                    return {
-                        ...center,
-                        totalMechanicsCount: avail.totalMechanicsCount,
-                        freeSlotsCount: openSlots.length,
-                        nextFreeSlot: openSlots[0]?.time || null,
-                        availableSlots: openSlots.map(s => s.time)
-                    };
-                } catch {
-                    return null;
+        const centerIds = centers.map(c => c.id);
+        const activeBookings = await prisma.serviceRequest.findMany({
+            where: {
+                centerId: { in: centerIds },
+                scheduledDate: { gte: dayStart, lte: dayEnd },
+                status: {
+                    in: [
+                        RequestStatus.ACCEPTED,
+                        RequestStatus.IN_PROGRESS,
+                        RequestStatus.COMPLETED_PENDING_REVIEW,
+                        RequestStatus.REASSIGNMENT_REQUIRED,
+                        RequestStatus.PENDING
+                    ]
                 }
-            })
-        );
+            },
+            select: {
+                centerId: true,
+                scheduledDate: true,
+                estimatedDuration: true
+            }
+        });
+
+        // Group bookings by centerId in-memory for instant slot calculation
+        const bookingsByCenter = new Map<string, typeof activeBookings>();
+        for (const booking of activeBookings) {
+            const list = bookingsByCenter.get(booking.centerId) || [];
+            list.push(booking);
+            bookingsByCenter.set(booking.centerId, list);
+        }
+
+        const standardSlots = [
+            "09:00", "10:00", "11:00", "12:00", "13:00",
+            "14:00", "15:00", "16:00", "17:00", "18:00"
+        ];
+
+        const populatedCenters = centers.map((center) => {
+            const totalMechanics = center.mechanics ? center.mechanics.length : 0;
+            const centerBookings = bookingsByCenter.get(center.id) || [];
+
+            const slotOccupancy: Record<string, number> = {};
+            for (const time of standardSlots) {
+                slotOccupancy[time] = 0;
+            }
+
+            for (const booking of centerBookings) {
+                const bookingTime = new Date(booking.scheduledDate);
+                const durationMins = booking.estimatedDuration || 60;
+                const bookingStartMins = bookingTime.getHours() * 60 + bookingTime.getMinutes();
+                const bookingEndMins = bookingStartMins + durationMins;
+
+                for (const timeStr of standardSlots) {
+                    const [h, m] = timeStr.split(":").map(Number);
+                    const slotMins = h * 60 + m;
+                    if (slotMins >= bookingStartMins && slotMins < bookingEndMins) {
+                        slotOccupancy[timeStr] = (slotOccupancy[timeStr] || 0) + 1;
+                    }
+                }
+            }
+
+            const openSlots = standardSlots.filter(t => totalMechanics === 0 || (slotOccupancy[t] || 0) < totalMechanics);
+            if (openSlots.length === 0 && totalMechanics > 0) {
+                return null;
+            }
+
+            return {
+                ...center,
+                totalMechanicsCount: totalMechanics,
+                freeSlotsCount: openSlots.length,
+                nextFreeSlot: openSlots[0] || null,
+                availableSlots: openSlots
+            };
+        });
 
         const availableOnly = populatedCenters.filter(Boolean);
 
@@ -146,11 +214,57 @@ const getCenterById = async (id: string) => {
                 where: {
                     status: UserStatus.ACTIVE,
                     isDeleted: false
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    fullName: true,
+                    email: true,
+                    phone: true,
+                    isAvailable: true,
+                    status: true
                 }
             },
-            rentalFleet: true,
-            reviews: true,
-            admin: true
+            rentalFleet: {
+                where: { isAvailable: true },
+                select: {
+                    id: true,
+                    make: true,
+                    model: true,
+                    year: true,
+                    type: true,
+                    pricePerDay: true,
+                    images: true,
+                    isAvailable: true
+                }
+            },
+            reviews: {
+                select: {
+                    id: true,
+                    rating: true,
+                    comment: true,
+                    createdAt: true,
+                    customer: {
+                        select: {
+                            id: true,
+                            name: true,
+                            fullName: true,
+                            image: true
+                        }
+                    }
+                },
+                orderBy: { createdAt: "desc" },
+                take: 10
+            },
+            admin: {
+                select: {
+                    id: true,
+                    name: true,
+                    fullName: true,
+                    email: true,
+                    phone: true
+                }
+            }
         }
     });
     if (!center) throw new AppError(status.NOT_FOUND, "Automotive Center not found.");

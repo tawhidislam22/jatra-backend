@@ -1,0 +1,146 @@
+[
+  {
+    "endpoint": "Public Automotive Centers",
+    "path": "/automotive-centers",
+    "status": 200,
+    "totalTimeMs": 1809.94,
+    "dbTimeMs": "2106.18ms",
+    "dbQueries": 4,
+    "sizeBytes": 2013
+  },
+  {
+    "endpoint": "Public Vehicles (All)",
+    "path": "/vehicles",
+    "status": 200,
+    "totalTimeMs": 3319.1,
+    "dbTimeMs": "3663.71ms",
+    "dbQueries": 2,
+    "sizeBytes": 8521
+  },
+  {
+    "endpoint": "Public Rental Fleet",
+    "path": "/vehicles?type=RENTAL_FLEET&page=1&limit=10",
+    "status": 200,
+    "totalTimeMs": 1210.95,
+    "dbTimeMs": "1551.55ms",
+    "dbQueries": 2,
+    "sizeBytes": 8690
+  },
+  {
+    "endpoint": "Vehicle Detail",
+    "path": "/vehicles/fda4a5bc-8ff5-41dd-b01d-78a8cd9797ad",
+    "status": 200,
+    "totalTimeMs": 692.27,
+    "dbTimeMs": "690.05ms",
+    "dbQueries": 1,
+    "sizeBytes": 941
+  },
+  {
+    "endpoint": "Center Detail",
+    "path": "/automotive-centers/0e67c1eb-229c-4786-8947-d11bff584c70",
+    "status": 200,
+    "totalTimeMs": 4271.25,
+    "dbTimeMs": "4265.3ms",
+    "dbQueries": 3,
+    "sizeBytes": 2535
+  },
+  {
+    "endpoint": "Vehicle Calendar Availability",
+    "path": "/rental-bookings/vehicle/fda4a5bc-8ff5-41dd-b01d-78a8cd9797ad/availability",
+    "status": 200,
+    "totalTimeMs": 343.7,
+    "dbTimeMs": "338.74ms",
+    "dbQueries": 1,
+    "sizeBytes": 1096
+  },
+  {
+    "endpoint": "Center Slot Availability",
+    "path": "/service-requests/centers/0e67c1eb-229c-4786-8947-d11bff584c70/availability?date=2026-11-12",
+    "status": 200,
+    "totalTimeMs": 1029.85,
+    "dbTimeMs": "1026.62ms",
+    "dbQueries": 2,
+    "sizeBytes": 1010
+  },
+  {
+    "endpoint": "Customer Rental Bookings",
+    "path": "/rental-bookings",
+    "status": 200,
+    "totalTimeMs": 1357.7,
+    "dbTimeMs": "1352.2ms",
+    "dbQueries": 2,
+    "sizeBytes": 20319
+  },
+  {
+    "endpoint": "Owner Rental Bookings",
+    "path": "/rental-bookings",
+    "status": 200,
+    "totalTimeMs": 1697.38,
+    "dbTimeMs": "1691.79ms",
+    "dbQueries": 3,
+    "sizeBytes": 3188
+  },
+  {
+    "endpoint": "Customer Service Requests",
+    "path": "/service-requests",
+    "status": 200,
+    "totalTimeMs": 3967.21,
+    "dbTimeMs": "3963.71ms",
+    "dbQueries": 2,
+    "sizeBytes": 6047
+  },
+  {
+    "endpoint": "Owner Service Requests",
+    "path": "/service-requests",
+    "status": 200,
+    "totalTimeMs": 4363.69,
+    "dbTimeMs": "4359.03ms",
+    "dbQueries": 3,
+    "sizeBytes": 3926
+  },
+  {
+    "endpoint": "Customer Notifications",
+    "path": "/notifications",
+    "status": 200,
+    "totalTimeMs": 690.79,
+    "dbTimeMs": "1024.52ms",
+    "dbQueries": 3,
+    "sizeBytes": 2182
+  },
+  {
+    "endpoint": "Customer Wishlist",
+    "path": "/wishlist/my-wishlist",
+    "status": 200,
+    "totalTimeMs": 1366.29,
+    "dbTimeMs": "1362.89ms",
+    "dbQueries": 2,
+    "sizeBytes": 1676
+  },
+  {
+    "endpoint": "Customer Conversations",
+    "path": "/conversations",
+    "status": 200,
+    "totalTimeMs": 1376.01,
+    "dbTimeMs": "1372.77ms",
+    "dbQueries": 2,
+    "sizeBytes": 2689
+  },
+  {
+    "endpoint": "Owner Conversations",
+    "path": "/conversations",
+    "status": 200,
+    "totalTimeMs": 1415.95,
+    "dbTimeMs": "1412.06ms",
+    "dbQueries": 2,
+    "sizeBytes": 1296
+  },
+  {
+    "endpoint": "Customer Wallet",
+    "path": "/wallets/my-wallet",
+    "status": 200,
+    "totalTimeMs": 1792.2,
+    "dbTimeMs": "1789.04ms",
+    "dbQueries": 3,
+    "sizeBytes": 297
+  }
+]

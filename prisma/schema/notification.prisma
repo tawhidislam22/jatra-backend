@@ -13,4 +13,6 @@ model Notification {
   @@index([userId])
   @@index([read])
   @@index([createdAt])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, read])
 }

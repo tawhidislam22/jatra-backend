@@ -29,6 +29,7 @@ model WalletTransaction {
   createdAt        DateTime                @default(now())
 
   @@index([walletId])
+  @@index([walletId, createdAt(sort: Desc)])
   @@index([rentalBookingId])
   @@index([serviceRequestId])
   @@index([createdAt])
