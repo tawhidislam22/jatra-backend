@@ -71,13 +71,18 @@ const getMyVehicles = catchAsync(async (req: AppRequest, res: AppResponse) => {
 
 const updateVehicle = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const id = req.params.id as string;
-    let payload = { ...req.body };
-    if (payload.data && typeof payload.data === 'string') {
-        try {
-            payload = { ...JSON.parse(payload.data), ...payload };
+    let payload = { ...(req.body || {}) };
+    if (payload.data) {
+        if (typeof payload.data === 'string') {
+            try {
+                payload = { ...JSON.parse(payload.data), ...payload };
+                delete payload.data;
+            } catch {
+                // keep as is
+            }
+        } else if (typeof payload.data === 'object') {
+            payload = { ...payload.data, ...payload };
             delete payload.data;
-        } catch {
-            // keep as is
         }
     }
     if (req.file) {

@@ -3,9 +3,13 @@ import { AppNextFunction, AppRequest, AppResponse } from "../interfaces/http.int
 
 export const validateRequest = (zodSchema: z.ZodTypeAny) => {
     return (req: AppRequest, res: AppResponse, next: AppNextFunction) => {
-        if (req.body.data) {
+        if (!req.body) {
+            req.body = {};
+        }
+        if (req.body?.data) {
             try {
-                req.body = JSON.parse(req.body.data);
+                const parsed = typeof req.body.data === 'string' ? JSON.parse(req.body.data) : req.body.data;
+                req.body = { ...parsed, ...req.body };
             } catch (e) {
                 // Ignore parse error, let Zod catch invalid formats
             }

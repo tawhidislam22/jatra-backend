@@ -157,7 +157,7 @@ const getMyVehicles = async (userId: string) => {
     });
 };
 
-const updateVehicle = async (id: string, user: any, payload: IUpdateVehicleRequest) => {
+const updateVehicle = async (id: string, user: any, payload: any) => {
     const vehicle = await prisma.vehicle.findUnique({ where: { id }, include: { center: true } });
     if (!vehicle) throw new AppError(status.NOT_FOUND, "Vehicle not found.");
 
@@ -169,9 +169,47 @@ const updateVehicle = async (id: string, user: any, payload: IUpdateVehicleReque
         throw new AppError(status.FORBIDDEN, "Not authorized to update this fleet vehicle.");
     }
 
+    const updateData: any = {};
+    if (payload.make !== undefined) updateData.make = String(payload.make).trim();
+    if (payload.model !== undefined) updateData.model = String(payload.model).trim();
+    if (payload.year !== undefined) updateData.year = typeof payload.year === 'number' ? payload.year : parseInt(payload.year, 10);
+    if (payload.licensePlate !== undefined) updateData.licensePlate = String(payload.licensePlate).trim();
+    if (payload.type !== undefined) updateData.type = payload.type;
+    if (payload.pricePerDay !== undefined) {
+        updateData.pricePerDay = payload.pricePerDay === null || payload.pricePerDay === '' ? null : (typeof payload.pricePerDay === 'number' ? payload.pricePerDay : parseFloat(payload.pricePerDay));
+    }
+    if (payload.isAvailable !== undefined) {
+        updateData.isAvailable = typeof payload.isAvailable === 'boolean' ? payload.isAvailable : payload.isAvailable === 'true';
+    }
+    if (payload.features !== undefined) {
+        if (Array.isArray(payload.features)) {
+            updateData.features = payload.features;
+        } else if (typeof payload.features === 'string') {
+            try {
+                updateData.features = JSON.parse(payload.features);
+            } catch {
+                updateData.features = payload.features.split(',').map((f: string) => f.trim()).filter(Boolean);
+            }
+        }
+    }
+    if (payload.images !== undefined) {
+        if (Array.isArray(payload.images)) {
+            updateData.images = payload.images;
+        } else if (typeof payload.images === 'string') {
+            try {
+                updateData.images = JSON.parse(payload.images);
+            } catch {
+                updateData.images = [payload.images];
+            }
+        }
+    }
+    if (payload.centerId !== undefined) {
+        updateData.centerId = payload.centerId;
+    }
+
     return await prisma.vehicle.update({
         where: { id },
-        data: payload
+        data: updateData
     });
 };
 
