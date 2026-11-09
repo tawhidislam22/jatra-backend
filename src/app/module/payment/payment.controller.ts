@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface";
 import { catchAsync } from "../../shared/catchAsync";
 import { PaymentService } from "./payment.service";
 import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
 
-const createCheckoutSession = catchAsync(async (req: Request | any, res: Response) => {
+const createCheckoutSession = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await PaymentService.createCheckoutSession(req.user.userId, req.body);
 
     sendResponse(res, {
@@ -15,14 +15,14 @@ const createCheckoutSession = catchAsync(async (req: Request | any, res: Respons
     });
 });
 
-const handleStripeWebhookEvent = catchAsync(async (req: Request, res: Response) => {
+const handleStripeWebhookEvent = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const sig = req.headers['stripe-signature'] as string;
     await PaymentService.handleStripeWebhookEvent(req.body, sig);
 
     res.status(200).send("Webhook received");
 });
 
-const getPaymentHistory = catchAsync(async (req: Request | any, res: Response) => {
+const getPaymentHistory = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await PaymentService.getPaymentHistory(req.user.userId);
 
     sendResponse(res, {
@@ -33,7 +33,7 @@ const getPaymentHistory = catchAsync(async (req: Request | any, res: Response) =
     });
 });
 
-const verifyPayment = catchAsync(async (req: Request, res: Response) => {
+const verifyPayment = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const sessionId = req.query.session_id as string;
     const result = await PaymentService.verifyPayment(sessionId);
 
@@ -45,7 +45,7 @@ const verifyPayment = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const getAllPayments = catchAsync(async (req: Request | any, res: Response) => {
+const getAllPayments = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await PaymentService.getAllPayments(req.query);
 
     sendResponse(res, {

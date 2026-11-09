@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface";
 import status from "http-status";
 import { catchAsync } from "../../shared/catchAsync";
 import { sendResponse } from "../../shared/sendResponse";
 import { UserService } from "./user.service";
 
-const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+const getAllUsers = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await UserService.getAllUsers(req.query as any);
     sendResponse(res, {
         httpStatusCode: status.OK,
@@ -15,7 +15,7 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const getUserById = catchAsync(async (req: Request, res: Response) => {
+const getUserById = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const id = req.params.id as string;
     const result = await UserService.getUserById(id);
     sendResponse(res, {
@@ -26,7 +26,7 @@ const getUserById = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const updateUserRole = catchAsync(async (req: Request, res: Response) => {
+const updateUserRole = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const id = req.params.id as string;
     const { role } = req.body;
     const result = await UserService.updateUserRole(id, role);
@@ -38,7 +38,7 @@ const updateUserRole = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
+const updateUserStatus = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const id = req.params.id as string;
     const { status: userStatus } = req.body;
     const result = await UserService.updateUserStatus(id, userStatus);
@@ -50,7 +50,7 @@ const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const deleteUser = catchAsync(async (req: Request, res: Response) => {
+const deleteUser = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const id = req.params.id as string;
     const result = await UserService.deleteUser(id);
     sendResponse(res, {
@@ -61,7 +61,7 @@ const deleteUser = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const getAdminOverviewStats = catchAsync(async (req: Request, res: Response) => {
+const getAdminOverviewStats = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await UserService.getAdminOverviewStats();
     sendResponse(res, {
         httpStatusCode: status.OK,

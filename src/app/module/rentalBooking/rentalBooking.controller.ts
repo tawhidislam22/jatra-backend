@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface";
 import { catchAsync } from "../../shared/catchAsync";
 import { RentalBookingService } from "./rentalBooking.service";
 import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
 
-const createBooking = catchAsync(async (req: Request | any, res: Response) => {
+const createBooking = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await RentalBookingService.createBooking(req.user.userId, req.body);
 
     sendResponse(res, {
@@ -15,7 +15,7 @@ const createBooking = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const getBookings = catchAsync(async (req: Request | any, res: Response) => {
+const getBookings = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await RentalBookingService.getBookings(req.user);
 
     sendResponse(res, {
@@ -26,7 +26,7 @@ const getBookings = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const updateBookingStatus = catchAsync(async (req: Request | any, res: Response) => {
+const updateBookingStatus = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const { id } = req.params;
     const result = await RentalBookingService.updateBookingStatus(id, req.user.userId, req.body);
 

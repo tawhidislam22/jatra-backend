@@ -1,14 +1,16 @@
-import { CookieOptions, Request, Response } from "express";
+import { AppRequest, AppResponse } from "../interfaces/http.interface";
 
-const setCookie = (res: Response, key: string, value: string, options: CookieOptions) => {
+type CookieOptions = Record<string, any>;
+
+const setCookie = (res: AppResponse, key: string, value: string, options: CookieOptions) => {
     res.cookie(key, value, options);
 }
 
-const getCookie = (req: Request, key: string) => {
+const getCookie = (req: AppRequest, key: string) => {
     return req.cookies[key];
 }
 
-const clearCookie = (res: Response, key: string, options: CookieOptions) => {
+const clearCookie = (res: AppResponse, key: string, options: CookieOptions) => {
     res.clearCookie(key, options);
 }
 

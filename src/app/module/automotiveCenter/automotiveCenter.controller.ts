@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface";
 import { catchAsync } from "../../shared/catchAsync";
 import { AutomotiveCenterService } from "./automotiveCenter.service";
 import { sendResponse } from "../../shared/sendResponse";
 import { tokenUtils } from "../../utils/token";
 import status from "http-status";
 
-const createCenter = catchAsync(async (req: Request | any, res: Response) => {
+const createCenter = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const userId = req.user.userId;
     const payload = { ...req.body };
     if (req.file) {
@@ -50,7 +50,7 @@ const createCenter = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const getAllCenters = catchAsync(async (req: Request, res: Response) => {
+const getAllCenters = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await AutomotiveCenterService.getAllCenters(req.query);
 
     sendResponse(res, {
@@ -62,7 +62,7 @@ const getAllCenters = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const getCenterById = catchAsync(async (req: Request, res: Response) => {
+const getCenterById = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const id = req.params.id as string;
     const result = await AutomotiveCenterService.getCenterById(id);
 
@@ -74,7 +74,7 @@ const getCenterById = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const updateCenter = catchAsync(async (req: Request | any, res: Response) => {
+const updateCenter = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const id = req.params.id as string;
     const adminId = req.user.userId;
     const payload = { ...req.body };
@@ -104,7 +104,7 @@ const updateCenter = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const addMechanicToCenter = catchAsync(async (req: Request | any, res: Response) => {
+const addMechanicToCenter = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const { id } = req.params;
     const adminId = req.user.userId;
     
@@ -118,7 +118,7 @@ const addMechanicToCenter = catchAsync(async (req: Request | any, res: Response)
     });
 });
 
-const verifyCenter = catchAsync(async (req: Request | any, res: Response) => {
+const verifyCenter = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const { id } = req.params;
     const { isApproved } = req.body;
     const result = await AutomotiveCenterService.verifyCenter(id, isApproved ?? true);
@@ -131,7 +131,7 @@ const verifyCenter = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const deleteCenter = catchAsync(async (req: Request | any, res: Response) => {
+const deleteCenter = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const { id } = req.params;
     const result = await AutomotiveCenterService.deleteCenter(id);
 

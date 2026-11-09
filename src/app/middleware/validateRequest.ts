@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from "express";
 import z from "zod";
+import { AppNextFunction, AppRequest, AppResponse } from "../interfaces/http.interface";
 
 export const validateRequest = (zodSchema: z.ZodTypeAny) => {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: AppRequest, res: AppResponse, next: AppNextFunction) => {
         if (req.body.data) {
             try {
                 req.body = JSON.parse(req.body.data);

@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface";
 import { catchAsync } from "../../shared/catchAsync";
 import { EmergencyAssistanceService } from "./emergencyAssistance.service";
 import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
 
-const requestAssistance = catchAsync(async (req: Request | any, res: Response) => {
+const requestAssistance = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await EmergencyAssistanceService.requestAssistance(req.user.userId, req.body);
 
     sendResponse(res, {
@@ -15,7 +15,7 @@ const requestAssistance = catchAsync(async (req: Request | any, res: Response) =
     });
 });
 
-const getEmergencies = catchAsync(async (req: Request | any, res: Response) => {
+const getEmergencies = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await EmergencyAssistanceService.getEmergencies(req.user);
 
     sendResponse(res, {
@@ -26,7 +26,7 @@ const getEmergencies = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const assignMechanic = catchAsync(async (req: Request | any, res: Response) => {
+const assignMechanic = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const { id } = req.params;
     const { mechanicId } = req.body;
     const result = await EmergencyAssistanceService.assignMechanic(id, req.user.userId, mechanicId);
@@ -39,7 +39,7 @@ const assignMechanic = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const updateStatus = catchAsync(async (req: Request | any, res: Response) => {
+const updateStatus = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const { id } = req.params;
     const result = await EmergencyAssistanceService.updateStatus(id, req.user, req.body);
 

@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface";
 import { catchAsync } from "../../shared/catchAsync";
 import { VehicleService } from "./vehicle.service";
 import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
 
-const registerVehicle = catchAsync(async (req: Request | any, res: Response) => {
+const registerVehicle = catchAsync(async (req: AppRequest, res: AppResponse) => {
     let payload = { ...req.body };
     if (payload.data && typeof payload.data === 'string') {
         try {
@@ -46,7 +46,7 @@ const registerVehicle = catchAsync(async (req: Request | any, res: Response) => 
     });
 });
 
-const getAllVehicles = catchAsync(async (req: Request, res: Response) => {
+const getAllVehicles = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await VehicleService.getAllVehicles(req.query);
 
     sendResponse(res, {
@@ -58,7 +58,7 @@ const getAllVehicles = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const getMyVehicles = catchAsync(async (req: Request | any, res: Response) => {
+const getMyVehicles = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await VehicleService.getMyVehicles(req.user.userId);
 
     sendResponse(res, {
@@ -69,7 +69,7 @@ const getMyVehicles = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const updateVehicle = catchAsync(async (req: Request | any, res: Response) => {
+const updateVehicle = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const id = req.params.id as string;
     const result = await VehicleService.updateVehicle(id, req.user, req.body);
 
@@ -81,7 +81,7 @@ const updateVehicle = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const getVehicleById = catchAsync(async (req: Request, res: Response) => {
+const getVehicleById = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const id = req.params.id as string;
     const result = await VehicleService.getVehicleById(id);
 

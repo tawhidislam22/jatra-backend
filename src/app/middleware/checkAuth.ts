@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextFunction, Request, Response } from "express";
 import status from "http-status";
 import { Role, UserStatus } from "../constants/prismaEnums";
 import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
+import { AppNextFunction, AppRequest, AppResponse } from "../interfaces/http.interface";
 import { prisma } from "../lib/prisma";
 import { CookieUtils } from "../utils/cookie";
 import { jwtUtils } from "../utils/jwt";
 
-export const checkAuth = (...authRoles: Role[]) => async (req: Request, res: Response, next: NextFunction) => {
+export const checkAuth = (...authRoles: Role[]) => async (req: AppRequest, res: AppResponse, next: AppNextFunction) => {
     try {
         let user: any = null;
 

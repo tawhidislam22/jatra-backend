@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "../../interfaces/http.interface";
 import { catchAsync } from "../../shared/catchAsync";
 import { ReviewService } from "./review.service";
 import { sendResponse } from "../../shared/sendResponse";
 import status from "http-status";
 
-const createReview = catchAsync(async (req: Request | any, res: Response) => {
+const createReview = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await ReviewService.createReview(req.user.userId, req.body);
 
     sendResponse(res, {
@@ -15,7 +15,7 @@ const createReview = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const getCenterReviews = catchAsync(async (req: Request, res: Response) => {
+const getCenterReviews = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const centerId = req.params.centerId as string;
     const result = await ReviewService.getCenterReviews(centerId);
 
@@ -27,7 +27,7 @@ const getCenterReviews = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const getMyReviews = catchAsync(async (req: Request | any, res: Response) => {
+const getMyReviews = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const userId = req.user.userId;
     const result = await ReviewService.getMyReviews(userId);
 
@@ -39,7 +39,7 @@ const getMyReviews = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const getAllReviews = catchAsync(async (req: Request | any, res: Response) => {
+const getAllReviews = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const result = await ReviewService.getAllReviews();
 
     sendResponse(res, {
@@ -50,7 +50,7 @@ const getAllReviews = catchAsync(async (req: Request | any, res: Response) => {
     });
 });
 
-const deleteReview = catchAsync(async (req: Request | any, res: Response) => {
+const deleteReview = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const { id } = req.params;
     const result = await ReviewService.deleteReview(id);
 
