@@ -24,6 +24,13 @@ const createCenter = catchAsync(async (req: AppRequest, res: AppResponse) => {
             payload.servicesOffered = [payload.servicesOffered];
         }
     }
+    if (typeof payload.customServices === 'string') {
+        try {
+            payload.customServices = JSON.parse(payload.customServices);
+        } catch {
+            // Keep as string if parsing fails
+        }
+    }
     const result = await AutomotiveCenterService.createCenter(userId, payload);
 
     // Issue updated accessToken with OWNER role
@@ -92,6 +99,13 @@ const updateCenter = catchAsync(async (req: AppRequest, res: AppResponse) => {
             payload.servicesOffered = JSON.parse(payload.servicesOffered);
         } catch {
             payload.servicesOffered = [payload.servicesOffered];
+        }
+    }
+    if (typeof payload.customServices === 'string') {
+        try {
+            payload.customServices = JSON.parse(payload.customServices);
+        } catch {
+            // Keep as string if parsing fails
         }
     }
     const result = await AutomotiveCenterService.updateCenter(id, adminId, payload);

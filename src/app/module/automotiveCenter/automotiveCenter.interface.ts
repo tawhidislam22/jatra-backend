@@ -6,6 +6,7 @@ export interface ICreateCenterRequest {
     phone?: string;
     description?: string;
     servicesOffered?: string[];
+    customServices?: any;
     images?: string[];
 }
 
@@ -17,5 +18,6 @@ export interface IUpdateCenterRequest {
     phone?: string;
     description?: string;
     servicesOffered?: string[];
+    customServices?: any;
     images?: string[];
 }

@@ -10,6 +10,7 @@ export const AutomotiveCenterValidation = {
             latitude: z.union([z.number(), z.string()]).optional().transform(val => typeof val === 'string' ? parseFloat(val) : (val ?? 23.8103)),
             longitude: z.union([z.number(), z.string()]).optional().transform(val => typeof val === 'string' ? parseFloat(val) : (val ?? 90.4125)),
             servicesOffered: z.union([z.array(z.string()), z.string()]).optional(),
+            customServices: z.any().optional(),
             images: z.union([z.array(z.string()), z.string()]).optional(),
         })
     }),
@@ -22,6 +23,7 @@ export const AutomotiveCenterValidation = {
             latitude: z.union([z.number(), z.string()]).optional().transform(val => typeof val === 'string' ? parseFloat(val) : val),
             longitude: z.union([z.number(), z.string()]).optional().transform(val => typeof val === 'string' ? parseFloat(val) : val),
             servicesOffered: z.union([z.array(z.string()), z.string()]).optional(),
+            customServices: z.any().optional(),
             images: z.union([z.array(z.string()), z.string()]).optional(),
         })
     }),

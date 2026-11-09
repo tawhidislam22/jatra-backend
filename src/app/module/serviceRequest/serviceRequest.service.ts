@@ -176,10 +176,29 @@ const createRequest = async (userId: string, payload: ICreateServiceRequest, pro
     }
 
     // 3. Resolve Service Package & Price
-    const catalogService = getServiceByNameOrId(payload.serviceName || "");
-    const serviceName = catalogService?.name || payload.serviceName || "Workshop Car Service";
-    const estimatedDuration = payload.estimatedDuration || catalogService?.estimatedDuration || 60;
-    const totalAmount = payload.totalAmount || catalogService?.price || 50;
+    let serviceName = payload.serviceName || "Workshop Car Service";
+    let estimatedDuration = Number(payload.estimatedDuration) || 60;
+    let totalAmount = Number(payload.totalAmount) || 50;
+
+    const centerRecord = await prisma.automotiveCenter.findUnique({ where: { id: payload.centerId } });
+    if (centerRecord?.customServices && Array.isArray(centerRecord.customServices)) {
+        const customPkg = (centerRecord.customServices as any[]).find((s: any) =>
+            s.name?.toLowerCase() === payload.serviceName?.toLowerCase() ||
+            s.id === payload.serviceName
+        );
+        if (customPkg) {
+            serviceName = customPkg.name || serviceName;
+            estimatedDuration = Number(customPkg.estimatedDuration) || estimatedDuration;
+            totalAmount = Number(customPkg.price) || totalAmount;
+        }
+    } else {
+        const catalogService = getServiceByNameOrId(payload.serviceName || "");
+        if (catalogService) {
+            serviceName = catalogService.name;
+            estimatedDuration = payload.estimatedDuration || catalogService.estimatedDuration;
+            totalAmount = payload.totalAmount || catalogService.price;
+        }
+    }
 
     const scheduledDate = new Date(payload.scheduledDate);
     const bookingEnd = new Date(scheduledDate.getTime() + estimatedDuration * 60 * 1000);

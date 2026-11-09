@@ -9,6 +9,7 @@ model AutomotiveCenter {
   rating          Float    @default(0)
   isApproved      Boolean  @default(false)
   servicesOffered String[]
+  customServices  Json?
   images          String[]
   adminId         String
 
