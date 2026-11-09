@@ -64,3 +64,10 @@ export const WalletTransactionReason = {
 } as const;
 
 export type WalletTransactionReason = (typeof WalletTransactionReason)[keyof typeof WalletTransactionReason];
+
+export const WishlistItemType = {
+    VEHICLE: "VEHICLE",
+    CENTER: "CENTER",
+} as const;
+
+export type WishlistItemType = (typeof WishlistItemType)[keyof typeof WishlistItemType];

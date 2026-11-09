@@ -20,6 +20,7 @@ model Vehicle {
 
   rentalBookings  RentalBooking[]
   serviceRequests ServiceRequest[]
+  wishlistItems   WishlistItem[]
 
   @@index([ownerId])
   @@index([centerId])

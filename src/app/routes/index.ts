@@ -10,6 +10,7 @@ import { UserRoutes } from "../module/user/user.route.js";
 import { ConversationRoutes } from "../module/conversation/conversation.route.js";
 import { NotificationRoutes } from "../module/notification/notification.route.js";
 import { WalletRoutes } from "../module/wallet/wallet.route.js";
+import { WishlistRoutes } from "../module/wishlist/wishlist.route.js";
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use("/payments", PaymentRoutes);
 router.use("/conversations", ConversationRoutes);
 router.use("/notifications", NotificationRoutes);
 router.use("/wallets", WalletRoutes);
+router.use("/wishlist", WishlistRoutes);
 
 export const IndexRoutes = router;

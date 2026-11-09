@@ -21,6 +21,7 @@ model AutomotiveCenter {
   serviceRequests   ServiceRequest[]
   reviews           Review[]
   conversations     Conversation[]
+  wishlistItems     WishlistItem[]
 
   @@index([adminId])
   @@index([isApproved])

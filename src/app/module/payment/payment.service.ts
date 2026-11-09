@@ -234,13 +234,21 @@ const fulfillCheckoutSession = async (sessionId: string) => {
 };
 
 const verifyPayment = async (sessionId: string) => {
-    const stripe = getStripe();
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    if (session.payment_status === 'paid') {
-        await fulfillCheckoutSession(sessionId);
-        return { success: true, message: "Payment verified and fulfilled" };
+    if (!sessionId || typeof sessionId !== 'string') {
+        return { success: false, message: "Invalid or missing session ID" };
     }
-    return { success: false, message: "Payment not completed" };
+    try {
+        const stripe = getStripe();
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        if (session.payment_status === 'paid') {
+            await fulfillCheckoutSession(sessionId);
+            return { success: true, message: "Payment verified and fulfilled" };
+        }
+        return { success: false, message: "Payment not completed" };
+    } catch (error: any) {
+        console.error("Payment verification error:", error?.message || error);
+        return { success: false, message: error?.message || "Failed to verify Stripe session" };
+    }
 };
 
 const getPaymentHistory = async (userId: string) => {

@@ -27,6 +27,7 @@ model User {
   reviews             Review[]
   wallet              Wallet?
   cancellations       CancellationRecord[]  @relation("UserCancellations")
+  wishlist            WishlistItem[]        @relation("UserWishlist")
 
   // Center Management & Employment
   managedCenters AutomotiveCenter[] @relation("CenterAdmin")

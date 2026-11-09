@@ -1,0 +1,18 @@
+model WishlistItem {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation("UserWishlist", fields: [userId], references: [id], onDelete: Cascade)
+
+  itemType  WishlistItemType
+  vehicleId String?
+  vehicle   Vehicle?         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  centerId  String?
+  center    AutomotiveCenter? @relation(fields: [centerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([vehicleId])
+  @@index([centerId])
+}

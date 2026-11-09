@@ -48,3 +48,8 @@ enum WalletTransactionReason {
   PAYMENT
   DEPOSIT
 }
+
+enum WishlistItemType {
+  VEHICLE
+  CENTER
+}
