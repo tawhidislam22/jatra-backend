@@ -18,6 +18,7 @@ const getUserConversations = async (userId: string) => {
           name: true,
           fullName: true,
           email: true,
+          phone: true,
           image: true,
           role: true,
         }
@@ -28,6 +29,7 @@ const getUserConversations = async (userId: string) => {
           name: true,
           fullName: true,
           email: true,
+          phone: true,
           image: true,
           role: true,
         }
@@ -114,10 +116,10 @@ const getConversationMessages = async (userId: string, conversationId: string) =
     where: { id: conversationId },
     include: {
       participant1: {
-        select: { id: true, name: true, fullName: true, image: true, role: true }
+        select: { id: true, name: true, fullName: true, email: true, phone: true, image: true, role: true }
       },
       participant2: {
-        select: { id: true, name: true, fullName: true, image: true, role: true }
+        select: { id: true, name: true, fullName: true, email: true, phone: true, image: true, role: true }
       },
       center: {
         select: { id: true, name: true, address: true, images: true }
@@ -228,6 +230,17 @@ const sendMessage = async (userId: string, conversationId: string, content: stri
 
   const senderName = senderUser.fullName || senderUser.name || "User";
 
+  const recipient = await prisma.user.findUnique({
+    where: { id: recipientId },
+    select: { id: true, role: true }
+  });
+
+  const messageLink = recipient?.role === "OWNER"
+    ? `/owner/dashboard/messages?conversationId=${conversationId}`
+    : recipient?.role === "MECHANIC"
+    ? `/mechanic/dashboard/messages?conversationId=${conversationId}`
+    : `/dashboard/messages?conversationId=${conversationId}`;
+
   const [newMessage] = await Promise.all([
     prisma.message.create({
       data: {
@@ -260,7 +273,7 @@ const sendMessage = async (userId: string, conversationId: string, content: stri
       title: `New message from ${senderName}`,
       message: content.trim().length > 60 ? `${content.trim().slice(0, 60)}...` : content.trim(),
       type: "MESSAGE",
-      link: `/dashboard/messages?conversationId=${conversationId}`
+      link: messageLink
     })
   ]);
 
