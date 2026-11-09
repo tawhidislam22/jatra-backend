@@ -1,0 +1,46 @@
+model Conversation {
+  id               String            @id @default(uuid())
+  participant1Id   String
+  participant1     User              @relation("ConversationParticipant1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2Id   String
+  participant2     User              @relation("ConversationParticipant2", fields: [participant2Id], references: [id], onDelete: Cascade)
+
+  centerId         String?
+  center           AutomotiveCenter? @relation(fields: [centerId], references: [id], onDelete: SetNull)
+
+  rentalBookingId  String?
+  rentalBooking    RentalBooking?    @relation(fields: [rentalBookingId], references: [id], onDelete: SetNull)
+
+  serviceRequestId String?
+  serviceRequest   ServiceRequest?   @relation(fields: [serviceRequestId], references: [id], onDelete: SetNull)
+
+  lastMessage      String?
+  lastMessageAt    DateTime?         @default(now())
+
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  messages         Message[]
+
+  @@index([participant1Id])
+  @@index([participant2Id])
+  @@index([centerId])
+  @@index([rentalBookingId])
+  @@index([serviceRequestId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  content        String
+  read           Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@index([senderId])
+}

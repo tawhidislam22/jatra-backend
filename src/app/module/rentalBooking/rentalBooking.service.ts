@@ -3,16 +3,21 @@ import AppError from "../../errorHelpers/AppError.js";
 import { prisma } from "../../lib/prisma.js";
 import { Role, RequestStatus, VehicleType } from "../../constants/prismaEnums.js";
 import { ICreateBookingRequest, IUpdateBookingStatusRequest } from "./rentalBooking.interface.js";
+import { ConversationService } from "../conversation/conversation.service.js";
+import { NotificationService } from "../notification/notification.service.js";
 
 const createBooking = async (userId: string, payload: ICreateBookingRequest) => {
     // Verify vehicle exists and is a rental fleet vehicle
-    const vehicle = await prisma.vehicle.findUnique({ where: { id: payload.vehicleId } });
+    const vehicle = await prisma.vehicle.findUnique({ 
+        where: { id: payload.vehicleId },
+        include: { center: true }
+    });
     if (!vehicle) throw new AppError(status.NOT_FOUND, "Vehicle not found.");
     if (vehicle.type !== VehicleType.RENTAL_FLEET) {
         throw new AppError(status.BAD_REQUEST, "Only rental fleet vehicles can be booked.");
     }
 
-    return await prisma.rentalBooking.create({
+    const booking = await prisma.rentalBooking.create({
         data: {
             customerId: userId,
             vehicleId: payload.vehicleId,
@@ -22,6 +27,43 @@ const createBooking = async (userId: string, payload: ICreateBookingRequest) => 
             status: RequestStatus.PENDING
         }
     });
+
+    // Auto-create/find conversation with vehicle owner/center
+    const customer = await prisma.user.findUnique({ where: { id: userId } });
+    const ownerId = vehicle.center?.adminId || vehicle.ownerId;
+    const vehicleTitle = `${vehicle.make} ${vehicle.model}`;
+
+    if (ownerId && ownerId !== userId) {
+        await ConversationService.createOrGetBookingConversation(
+            userId,
+            ownerId,
+            vehicle.centerId || undefined,
+            booking.id,
+            vehicleTitle,
+            booking.pickupDate,
+            booking.returnDate
+        );
+
+        // Notifications
+        await Promise.all([
+            NotificationService.createNotification({
+                userId: ownerId,
+                title: "New Rental Booking",
+                message: `${customer?.fullName || customer?.name || "Customer"} booked ${vehicleTitle}. Check your bookings and messages.`,
+                type: "BOOKING",
+                link: `/owner/dashboard/bookings`
+            }),
+            NotificationService.createNotification({
+                userId,
+                title: "Booking Submitted",
+                message: `Your booking request for ${vehicleTitle} has been submitted to ${vehicle.center?.name || "the host"}.`,
+                type: "BOOKING",
+                link: `/dashboard/bookings`
+            })
+        ]);
+    }
+
+    return booking;
 };
 
 const getBookings = async (user: any) => {
@@ -67,10 +109,21 @@ const updateBookingStatus = async (id: string, adminId: string, payload: IUpdate
         throw new AppError(status.FORBIDDEN, "Not authorized to update this booking.");
     }
 
-    return await prisma.rentalBooking.update({
+    const updated = await prisma.rentalBooking.update({
         where: { id },
         data: { status: payload.status }
     });
+
+    // Notify customer
+    await NotificationService.createNotification({
+        userId: booking.customerId,
+        title: `Rental Booking ${payload.status}`,
+        message: `Your rental booking for ${booking.vehicle?.make || ''} ${booking.vehicle?.model || ''} is now ${payload.status}.`,
+        type: "BOOKING",
+        link: `/dashboard/bookings`
+    });
+
+    return updated;
 };
 
 export const RentalBookingService = {

@@ -19,6 +19,7 @@ model AutomotiveCenter {
   rentalFleet       Vehicle[]             @relation("CenterFleet")
   serviceRequests   ServiceRequest[]
   reviews           Review[]
+  conversations     Conversation[]
 
   @@index([adminId])
   @@index([isApproved])

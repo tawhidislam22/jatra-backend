@@ -12,6 +12,7 @@ model RentalBooking {
   vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
   payment    Payment?
   review     Review?
+  conversations Conversation[]
 
   @@index([customerId])
   @@index([vehicleId])

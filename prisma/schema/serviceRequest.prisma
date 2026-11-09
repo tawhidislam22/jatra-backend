@@ -16,6 +16,7 @@ model ServiceRequest {
   mechanic   User?            @relation("MechanicServices", fields: [mechanicId], references: [id])
   payment    Payment?
   review     Review?
+  conversations Conversation[]
 
   @@index([customerId])
   @@index([centerId])

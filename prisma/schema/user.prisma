@@ -32,6 +32,12 @@ model User {
   employedAtCenterId String?
   employedAtCenter   AutomotiveCenter? @relation("CenterMechanics", fields: [employedAtCenterId], references: [id])
 
+  // Communication & Notifications
+  conversationsAsP1 Conversation[] @relation("ConversationParticipant1")
+  conversationsAsP2 Conversation[] @relation("ConversationParticipant2")
+  messages          Message[]
+  notifications     Notification[]
+
   @@index([role])
   @@index([status])
   @@index([employedAtCenterId])

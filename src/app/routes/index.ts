@@ -7,6 +7,8 @@ import { ServiceRequestRoutes } from "../module/serviceRequest/serviceRequest.ro
 import { ReviewRoutes } from "../module/review/review.route.js";
 import { PaymentRoutes } from "../module/payment/payment.route.js";
 import { UserRoutes } from "../module/user/user.route.js";
+import { ConversationRoutes } from "../module/conversation/conversation.route.js";
+import { NotificationRoutes } from "../module/notification/notification.route.js";
 
 const router = Router();
 
@@ -18,5 +20,7 @@ router.use("/rental-bookings", RentalBookingRoutes);
 router.use("/service-requests", ServiceRequestRoutes);
 router.use("/reviews", ReviewRoutes);
 router.use("/payments", PaymentRoutes);
+router.use("/conversations", ConversationRoutes);
+router.use("/notifications", NotificationRoutes);
 
 export const IndexRoutes = router;

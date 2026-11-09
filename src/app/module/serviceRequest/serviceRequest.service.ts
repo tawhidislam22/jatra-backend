@@ -3,6 +3,8 @@ import AppError from "../../errorHelpers/AppError.js";
 import { prisma } from "../../lib/prisma.js";
 import { Role, RequestStatus } from "../../constants/prismaEnums.js";
 import { ICreateServiceRequest, IUpdateServiceRequestStatus } from "./serviceRequest.interface.js";
+import { ConversationService } from "../conversation/conversation.service.js";
+import { NotificationService } from "../notification/notification.service.js";
 
 const createRequest = async (userId: string, payload: ICreateServiceRequest) => {
     // Verify vehicle belongs to user if CUSTOMER
@@ -14,7 +16,7 @@ const createRequest = async (userId: string, payload: ICreateServiceRequest) => 
         }
     }
 
-    return await prisma.serviceRequest.create({
+    const request = await prisma.serviceRequest.create({
         data: {
             customerId: userId,
             vehicleId: payload.vehicleId,
@@ -25,6 +27,42 @@ const createRequest = async (userId: string, payload: ICreateServiceRequest) => 
             status: RequestStatus.PENDING
         }
     });
+
+    // Auto-create/find conversation with center owner
+    const center = await prisma.automotiveCenter.findUnique({ where: { id: payload.centerId } });
+    const customer = await prisma.user.findUnique({ where: { id: userId } });
+
+    if (center?.adminId && center.adminId !== userId) {
+        await ConversationService.createOrGetServiceConversation(
+            userId,
+            center.adminId,
+            payload.centerId,
+            request.id,
+            payload.serviceType,
+            payload.issueDescription,
+            request.scheduledDate
+        );
+
+        // Notifications
+        await Promise.all([
+            NotificationService.createNotification({
+                userId: center.adminId,
+                title: "New Service Request",
+                message: `${customer?.fullName || customer?.name || "Customer"} requested ${payload.serviceType} at ${center.name}.`,
+                type: "SERVICE",
+                link: `/owner/dashboard/service-requests`
+            }),
+            NotificationService.createNotification({
+                userId,
+                title: "Service Request Submitted",
+                message: `Your ${payload.serviceType} service request has been sent to ${center.name}.`,
+                type: "SERVICE",
+                link: `/dashboard/service-requests`
+            })
+        ]);
+    }
+
+    return request;
 };
 
 const getRequests = async (user: any) => {
@@ -77,10 +115,21 @@ const assignMechanic = async (id: string, adminId: string, mechanicId: string) =
         throw new AppError(status.BAD_REQUEST, "Mechanic does not work at this center.");
     }
 
-    return await prisma.serviceRequest.update({
+    const updated = await prisma.serviceRequest.update({
         where: { id },
         data: { mechanicId, status: RequestStatus.ACCEPTED }
     });
+
+    // Notify mechanic
+    await NotificationService.createNotification({
+        userId: mechanicId,
+        title: "Service Job Assigned",
+        message: `You have been assigned to service request #${id.slice(0, 8)} at ${request.center.name}.`,
+        type: "SERVICE",
+        link: `/mechanic/dashboard/assigned-services`
+    });
+
+    return updated;
 };
 
 const updateStatus = async (id: string, user: any, payload: IUpdateServiceRequestStatus) => {
@@ -93,10 +142,21 @@ const updateStatus = async (id: string, user: any, payload: IUpdateServiceReques
         throw new AppError(status.FORBIDDEN, "Not assigned to this request.");
     }
 
-    return await prisma.serviceRequest.update({
+    const updated = await prisma.serviceRequest.update({
         where: { id },
         data: { status: payload.status }
     });
+
+    // Notify customer
+    await NotificationService.createNotification({
+        userId: request.customerId,
+        title: `Service Request ${payload.status}`,
+        message: `Your service request at ${request.center.name} is now ${payload.status}.`,
+        type: "SERVICE",
+        link: `/dashboard/service-requests`
+    });
+
+    return updated;
 };
 
 export const ServiceRequestService = {
