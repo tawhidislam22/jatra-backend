@@ -23,8 +23,6 @@ model User {
   rentalBookings      RentalBooking[]
   serviceRequests     ServiceRequest[]      @relation("CustomerServices")
   assignedServices    ServiceRequest[]      @relation("MechanicServices")
-  emergencyRequests   EmergencyAssistance[] @relation("CustomerEmergencies")
-  assignedEmergencies EmergencyAssistance[] @relation("MechanicEmergencies")
   payments            Payment[]
   reviews             Review[]
 

@@ -541,53 +541,6 @@
       ]
     },
     {
-      "name": "Emergency Assistance",
-      "item": [
-        {
-          "name": "Request Emergency",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"latitude\": 40.7128,\n  \"longitude\": -74.0060,\n  \"issueDescription\": \"Car broke down on the highway\",\n  \"centerId\": \"<CENTER_ID>\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/emergencies",
-              "host": ["{{baseUrl}}"],
-              "path": ["emergencies"]
-            }
-          }
-        },
-        {
-          "name": "Get Emergencies",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/emergencies",
-              "host": ["{{baseUrl}}"],
-              "path": ["emergencies"]
-            }
-          }
-        }
-      ]
-    },
-    {
       "name": "Payments",
       "item": [
         {

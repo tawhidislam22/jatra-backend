@@ -9,15 +9,12 @@ model Payment {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  // A payment can belong to one of these three services
+  // A payment can belong to a rental booking or a service request
   rentalBookingId String?        @unique
   rentalBooking   RentalBooking? @relation(fields: [rentalBookingId], references: [id])
 
   serviceRequestId String?         @unique
   serviceRequest   ServiceRequest? @relation(fields: [serviceRequestId], references: [id])
-
-  emergencyId      String?              @unique
-  emergencyRequest EmergencyAssistance? @relation(fields: [emergencyId], references: [id])
 
   @@index([userId])
   @@index([status])

@@ -52,8 +52,6 @@ const getAllUsers = async (query: IUserFilterQuery) => {
                         rentalBookings: true,
                         serviceRequests: true,
                         assignedServices: true,
-                        emergencyRequests: true,
-                        assignedEmergencies: true,
                         reviews: true
                     }
                 }
@@ -94,16 +92,6 @@ const getUserById = async (id: string) => {
                 include: { vehicle: true, center: true, customer: true },
                 take: 10,
                 orderBy: { scheduledDate: 'desc' }
-            },
-            emergencyRequests: {
-                include: { center: true, mechanic: true },
-                take: 10,
-                orderBy: { requestedAt: 'desc' }
-            },
-            assignedEmergencies: {
-                include: { customer: true, center: true },
-                take: 10,
-                orderBy: { requestedAt: 'desc' }
             },
             reviews: {
                 include: { center: true },
@@ -179,17 +167,12 @@ const getAdminOverviewStats = async () => {
         pendingServices,
         inProgressServices,
         completedServices,
-        totalEmergencies,
-        pendingEmergencies,
-        inProgressEmergencies,
-        completedEmergencies,
         totalBookings,
         bookingAggregate,
         totalPayments,
         paymentAggregate,
         recentUsers,
         recentPendingCenters,
-        recentEmergencies,
         recentBookings
     ] = await Promise.all([
         prisma.user.count({ where: { isDeleted: false } }),
@@ -209,10 +192,6 @@ const getAdminOverviewStats = async () => {
         prisma.serviceRequest.count({ where: { status: RequestStatus.PENDING } }),
         prisma.serviceRequest.count({ where: { status: RequestStatus.IN_PROGRESS } }),
         prisma.serviceRequest.count({ where: { status: RequestStatus.COMPLETED } }),
-        prisma.emergencyAssistance.count(),
-        prisma.emergencyAssistance.count({ where: { status: RequestStatus.PENDING } }),
-        prisma.emergencyAssistance.count({ where: { status: RequestStatus.IN_PROGRESS } }),
-        prisma.emergencyAssistance.count({ where: { status: RequestStatus.COMPLETED } }),
         prisma.rentalBooking.count(),
         prisma.rentalBooking.aggregate({
             _sum: { totalAmount: true }
@@ -232,11 +211,6 @@ const getAdminOverviewStats = async () => {
             take: 5,
             orderBy: { rating: 'desc' },
             include: { admin: { select: { fullName: true, name: true, email: true, phone: true } } }
-        }),
-        prisma.emergencyAssistance.findMany({
-            take: 5,
-            orderBy: { requestedAt: 'desc' },
-            include: { customer: { select: { fullName: true, name: true, phone: true } }, center: { select: { name: true } } }
         }),
         prisma.rentalBooking.findMany({
             take: 5,
@@ -273,12 +247,6 @@ const getAdminOverviewStats = async () => {
             inProgress: inProgressServices,
             completed: completedServices
         },
-        emergencies: {
-            total: totalEmergencies,
-            pending: pendingEmergencies,
-            inProgress: inProgressEmergencies,
-            completed: completedEmergencies
-        },
         financials: {
             totalBookings,
             totalBookingsGross: bookingAggregate._sum.totalAmount || 0,
@@ -290,7 +258,6 @@ const getAdminOverviewStats = async () => {
         recentActivity: {
             users: recentUsers,
             pendingCenters: recentPendingCenters,
-            emergencies: recentEmergencies,
             bookings: recentBookings
         }
     };

@@ -26,7 +26,6 @@ const createCheckoutSession = async (userId: string, payload: ICreateCheckoutSes
     const metadata: Record<string, string> = { userId };
     if (payload.serviceRequestId) metadata.serviceRequestId = String(payload.serviceRequestId);
     if (payload.rentalBookingId) metadata.rentalBookingId = String(payload.rentalBookingId);
-    if (payload.emergencyId) metadata.emergencyId = String(payload.emergencyId);
 
     // Basic setup for Stripe session
     const stripe = getStripe();
@@ -56,7 +55,6 @@ const createCheckoutSession = async (userId: string, payload: ICreateCheckoutSes
             userId: userId,
             serviceRequestId: payload.serviceRequestId,
             rentalBookingId: payload.rentalBookingId,
-            emergencyId: payload.emergencyId,
             amount: payload.amount,
             status: PaymentStatus.PENDING,
             transactionId: session.id
@@ -126,7 +124,7 @@ const fulfillCheckoutSession = async (sessionId: string) => {
                 invoiceId: invoiceNumber,
                 transactionId: payment.transactionId,
                 paymentDate: new Date().toLocaleDateString(),
-                serviceName: payment.rentalBookingId ? "Vehicle Rental" : (payment.serviceRequestId ? "Automotive Service" : "Emergency Assistance"),
+                serviceName: payment.rentalBookingId ? "Vehicle Rental" : "Automotive Service",
                 bookingDate: new Date().toLocaleDateString(),
                 amount: payment.amount,
                 invoiceUrl: ""
@@ -194,9 +192,6 @@ const getAllPayments = async (query?: any) => {
                 },
                 rentalBooking: {
                     include: { vehicle: true }
-                },
-                emergencyRequest: {
-                    include: { center: true }
                 }
             }
         }),
