@@ -1,7 +1,7 @@
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
-import { Role, RequestStatus, VehicleType } from "../../../generated/prisma/browser";
+import { Role, RequestStatus, VehicleType } from "../../constants/prismaEnums";
 import { ICreateBookingRequest, IUpdateBookingStatusRequest } from "./rentalBooking.interface";
 
 const createBooking = async (userId: string, payload: ICreateBookingRequest) => {

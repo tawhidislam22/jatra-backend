@@ -1,7 +1,7 @@
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
-import { Role, UserStatus } from "../../../generated/prisma/enums";
+import { Role, UserStatus } from "../../constants/prismaEnums";
 import { auth } from "../../lib/auth";
 import { ICreateCenterRequest, IUpdateCenterRequest } from "./automotiveCenter.interface";
 import { QueryBuilder } from "../../utils/QueryBuilder";

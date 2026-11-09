@@ -1,7 +1,7 @@
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
-import { Role, UserStatus, RequestStatus, VehicleType } from "../../../generated/prisma/enums";
+import { Role, UserStatus, RequestStatus, VehicleType } from "../../constants/prismaEnums";
 import { IUserFilterQuery } from "./user.interface";
 
 const getAllUsers = async (query: IUserFilterQuery) => {

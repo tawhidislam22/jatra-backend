@@ -1,4 +1,4 @@
-import { VehicleType } from "../../../generated/prisma/browser";
+import { VehicleType } from "../../constants/prismaEnums";
 
 export interface IRegisterVehicleRequest {
     make: string;

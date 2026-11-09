@@ -1,4 +1,4 @@
-import { RequestStatus } from "../../../generated/prisma/browser";
+import { RequestStatus } from "../../constants/prismaEnums";
 
 export interface IRequestAssistanceRequest {
     latitude: number;

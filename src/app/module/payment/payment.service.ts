@@ -3,7 +3,7 @@ import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
 import Stripe from "stripe";
 import { envVars } from "../../config/env";
-import { PaymentStatus } from "../../../generated/prisma/browser";
+import { PaymentStatus } from "../../constants/prismaEnums";
 import { ICreateCheckoutSessionRequest } from "./payment.interface";
 
 const stripe = new Stripe(envVars.STRIPE.STRIPE_SECRET_KEY as string, {

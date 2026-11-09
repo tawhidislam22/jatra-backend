@@ -2,7 +2,12 @@
 // npm install --save-dev prisma dotenv
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
-import { envVars } from "./src/app/config/env";
+
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL is required to load Prisma config.");
+}
 
 export default defineConfig({
   schema: "prisma/schema",
@@ -10,6 +15,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: envVars.DATABASE_URL,
+    url: databaseUrl,
   },
 });

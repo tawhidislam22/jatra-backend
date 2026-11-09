@@ -1,7 +1,7 @@
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
-import { Role, VehicleType } from "../../../generated/prisma/browser";
+import { Role, VehicleType } from "../../constants/prismaEnums";
 import { IRegisterVehicleRequest, IUpdateVehicleRequest, IVehicleFilterQuery } from "./vehicle.interface";
 
 const registerVehicle = async (user: any, payload: IRegisterVehicleRequest) => {

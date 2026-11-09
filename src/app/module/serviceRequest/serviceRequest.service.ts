@@ -1,7 +1,7 @@
 import status from "http-status";
 import AppError from "../../errorHelpers/AppError";
 import { prisma } from "../../lib/prisma";
-import { Role, RequestStatus } from "../../../generated/prisma/browser";
+import { Role, RequestStatus } from "../../constants/prismaEnums";
 import { ICreateServiceRequest, IUpdateServiceRequestStatus } from "./serviceRequest.interface";
 
 const createRequest = async (userId: string, payload: ICreateServiceRequest) => {

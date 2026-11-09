@@ -1,5 +1,5 @@
 import z from "zod";
-import { ServiceType, RequestStatus } from "../../../generated/prisma/browser";
+import { ServiceType, RequestStatus } from "../../constants/prismaEnums";
 
 export const ServiceRequestValidation = {
     createRequest: z.object({

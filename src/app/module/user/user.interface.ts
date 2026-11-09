@@ -1,4 +1,4 @@
-import { Role, UserStatus } from "../../../generated/prisma/enums";
+import { Role, UserStatus } from "../../constants/prismaEnums";
 
 export interface IUserFilterQuery {
     role?: Role;
