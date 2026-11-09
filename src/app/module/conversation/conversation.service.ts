@@ -8,7 +8,8 @@ const getUserConversations = async (userId: string) => {
     where: {
       OR: [
         { participant1Id: userId },
-        { participant2Id: userId }
+        { participant2Id: userId },
+        { center: { adminId: userId } }
       ]
     },
     include: {
@@ -37,6 +38,7 @@ const getUserConversations = async (userId: string) => {
       center: {
         select: {
           id: true,
+          adminId: true,
           name: true,
           address: true,
           images: true,
@@ -50,6 +52,17 @@ const getUserConversations = async (userId: string) => {
           returnDate: true,
           totalAmount: true,
           status: true,
+          customer: {
+            select: {
+              id: true,
+              name: true,
+              fullName: true,
+              email: true,
+              phone: true,
+              image: true,
+              role: true,
+            }
+          },
           vehicle: {
             select: {
               id: true,
@@ -65,9 +78,21 @@ const getUserConversations = async (userId: string) => {
         select: {
           id: true,
           serviceType: true,
+          serviceName: true,
           scheduledDate: true,
           status: true,
           issueDescription: true,
+          customer: {
+            select: {
+              id: true,
+              name: true,
+              fullName: true,
+              email: true,
+              phone: true,
+              image: true,
+              role: true,
+            }
+          },
           vehicle: {
             select: {
               id: true,
@@ -92,8 +117,21 @@ const getUserConversations = async (userId: string) => {
   });
 
   return conversations.map((conv) => {
-    const isP1 = conv.participant1Id === userId;
-    const otherParticipant = isP1 ? conv.participant2 : conv.participant1;
+    let otherParticipant = conv.participant1Id === userId ? conv.participant2 : conv.participant1;
+
+    // When viewed by center admin / owner, guarantee otherParticipant resolves to the customer
+    if (conv.center?.adminId === userId) {
+      if (conv.serviceRequest?.customer) {
+        otherParticipant = conv.serviceRequest.customer;
+      } else if (conv.rentalBooking?.customer) {
+        otherParticipant = conv.rentalBooking.customer;
+      } else if (conv.participant1?.role === "CUSTOMER") {
+        otherParticipant = conv.participant1;
+      } else if (conv.participant2?.role === "CUSTOMER") {
+        otherParticipant = conv.participant2;
+      }
+    }
+
     const unreadCount = conv.messages.length;
 
     return {
@@ -122,7 +160,7 @@ const getConversationMessages = async (userId: string, conversationId: string) =
         select: { id: true, name: true, fullName: true, email: true, phone: true, image: true, role: true }
       },
       center: {
-        select: { id: true, name: true, address: true, images: true }
+        select: { id: true, adminId: true, name: true, address: true, images: true }
       },
       rentalBooking: {
         select: {
@@ -131,6 +169,9 @@ const getConversationMessages = async (userId: string, conversationId: string) =
           returnDate: true,
           totalAmount: true,
           status: true,
+          customer: {
+            select: { id: true, name: true, fullName: true, email: true, phone: true, image: true, role: true }
+          },
           vehicle: { select: { make: true, model: true } }
         }
       },
@@ -138,8 +179,12 @@ const getConversationMessages = async (userId: string, conversationId: string) =
         select: {
           id: true,
           serviceType: true,
+          serviceName: true,
           scheduledDate: true,
           status: true,
+          customer: {
+            select: { id: true, name: true, fullName: true, email: true, phone: true, image: true, role: true }
+          },
           vehicle: { select: { make: true, model: true } }
         }
       }
@@ -150,7 +195,11 @@ const getConversationMessages = async (userId: string, conversationId: string) =
     throw new AppError(status.NOT_FOUND, "Conversation not found.");
   }
 
-  if (conversation.participant1Id !== userId && conversation.participant2Id !== userId) {
+  const isP1 = conversation.participant1Id === userId;
+  const isP2 = conversation.participant2Id === userId;
+  const isCenterAdmin = conversation.center?.adminId === userId;
+
+  if (!isP1 && !isP2 && !isCenterAdmin) {
     throw new AppError(status.FORBIDDEN, "Not authorized to access this conversation.");
   }
 
@@ -180,9 +229,21 @@ const getConversationMessages = async (userId: string, conversationId: string) =
     data: { read: true }
   });
 
-  const otherParticipant = conversation.participant1Id === userId 
+  let otherParticipant = conversation.participant1Id === userId 
     ? conversation.participant2 
     : conversation.participant1;
+
+  if (isCenterAdmin) {
+    if (conversation.serviceRequest?.customer) {
+      otherParticipant = conversation.serviceRequest.customer;
+    } else if (conversation.rentalBooking?.customer) {
+      otherParticipant = conversation.rentalBooking.customer;
+    } else if (conversation.participant1?.role === "CUSTOMER") {
+      otherParticipant = conversation.participant1;
+    } else if (conversation.participant2?.role === "CUSTOMER") {
+      otherParticipant = conversation.participant2;
+    }
+  }
 
   return {
     conversation: {
@@ -207,8 +268,9 @@ const sendMessage = async (userId: string, conversationId: string, content: stri
   const conversation = await prisma.conversation.findUnique({
     where: { id: conversationId },
     include: {
-      participant1: { select: { id: true, name: true, fullName: true } },
-      participant2: { select: { id: true, name: true, fullName: true } },
+      participant1: { select: { id: true, name: true, fullName: true, role: true } },
+      participant2: { select: { id: true, name: true, fullName: true, role: true } },
+      center: { select: { id: true, adminId: true, name: true } },
     }
   });
 
@@ -216,17 +278,25 @@ const sendMessage = async (userId: string, conversationId: string, content: stri
     throw new AppError(status.NOT_FOUND, "Conversation not found.");
   }
 
-  if (conversation.participant1Id !== userId && conversation.participant2Id !== userId) {
+  const isP1 = conversation.participant1Id === userId;
+  const isP2 = conversation.participant2Id === userId;
+  const isCenterAdmin = conversation.center?.adminId === userId;
+
+  if (!isP1 && !isP2 && !isCenterAdmin) {
     throw new AppError(status.FORBIDDEN, "Not authorized to participate in this conversation.");
   }
 
-  const recipientId = conversation.participant1Id === userId 
+  const recipientId = isP1 
     ? conversation.participant2Id 
+    : isP2 
+    ? conversation.participant1Id 
     : conversation.participant1Id;
 
-  const senderUser = conversation.participant1Id === userId 
+  const senderUser = isP1 
     ? conversation.participant1 
-    : conversation.participant2;
+    : isP2 
+    ? conversation.participant2 
+    : { fullName: "Service Center Admin", name: conversation.center?.name || "Center Admin" };
 
   const senderName = senderUser.fullName || senderUser.name || "User";
 
