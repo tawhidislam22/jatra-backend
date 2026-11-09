@@ -29,7 +29,7 @@ const createCenter = async (userId: string, payload: ICreateCenterRequest) => {
 };
 
 const getAllCenters = async (query: any) => {
-    const isPublic = !query.adminId;
+    const isPublic = !query.adminId && query.forAdmin !== 'true' && query.all !== 'true';
     const whereConditions: any = {};
 
     if (isPublic) {
@@ -44,6 +44,10 @@ const getAllCenters = async (query: any) => {
         };
     } else if (query.adminId) {
         whereConditions.adminId = query.adminId;
+    }
+
+    if (query.isApproved !== undefined) {
+        whereConditions.isApproved = query.isApproved === 'true' || query.isApproved === true;
     }
 
     if (query.searchTerm) {
