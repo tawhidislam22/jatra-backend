@@ -152,20 +152,20 @@ export const auth = betterAuth({
 
     advanced: {
         // disableCSRFCheck: true,
-        useSecureCookies : false,
+        useSecureCookies : envVars.NODE_ENV === "production",
         cookies:{
             state:{
                 attributes:{
-                    sameSite: "none",
-                    secure: true,
+                    sameSite: envVars.NODE_ENV === "production" ? "none" : "lax",
+                    secure: envVars.NODE_ENV === "production",
                     httpOnly: true,
                     path: "/",
                 }
             },
             sessionToken:{
                 attributes:{
-                    sameSite: "none",
-                    secure: true,
+                    sameSite: envVars.NODE_ENV === "production" ? "none" : "lax",
+                    secure: envVars.NODE_ENV === "production",
                     httpOnly: true,
                     path: "/",
                 }

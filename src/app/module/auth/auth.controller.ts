@@ -10,6 +10,99 @@ import { CookieUtils } from "../../utils/cookie";
 import { tokenUtils } from "../../utils/token";
 import { AuthService } from "./auth.service";
 
+const getSafeRedirectPath = (redirectPath?: string) => {
+    if (!redirectPath) {
+        return "/dashboard";
+    }
+
+    let decodedPath = redirectPath;
+    try {
+        decodedPath = decodeURIComponent(redirectPath);
+    } catch {
+        return "/dashboard";
+    }
+    const isValidRedirectPath = decodedPath.startsWith("/") && !decodedPath.startsWith("//");
+
+    return isValidRedirectPath ? decodedPath : "/dashboard";
+}
+
+const getGoogleRedirectHtml = (betterAuthUrl: string, callbackURL: string) => `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jatra - Redirecting to Google...</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0f172a;
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+        }
+        .container { text-align: center; }
+        .logo {
+            font-size: 36px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            color: #60a5fa;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .text { font-size: 16px; color: #94a3b8; font-weight: 500; }
+        .error { color: #ef4444; margin-top: 20px; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="container" id="content-container">
+        <div class="logo">JATRA</div>
+        <div class="spinner"></div>
+        <div class="text">Connecting to Google securely...</div>
+    </div>
+    <script>
+        (async () => {
+            try {
+                const response = await fetch(${JSON.stringify(`${betterAuthUrl}/api/auth/sign-in/social`)}, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        provider: "google",
+                        callbackURL: ${JSON.stringify(callbackURL)}
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.url) {
+                    window.location.href = data.url;
+                    return;
+                }
+
+                document.getElementById("content-container").innerHTML =
+                    '<div class="logo">JATRA</div><div class="error">Error connecting to Google. Please try again later.</div>';
+            } catch (error) {
+                document.getElementById("content-container").innerHTML =
+                    '<div class="logo">JATRA</div><div class="error">Error connecting to Google. Please try again later.</div>';
+            }
+        })();
+    </script>
+</body>
+</html>`;
+
 const registerUser = catchAsync(
     async (req: Request, res: Response) => {
         const maxAge = ms(envVars.ACCESS_TOKEN_EXPIRES_IN as StringValue);
@@ -255,20 +348,17 @@ const resetPassword = catchAsync(
 
 // /api/v1/auth/login/google?redirect=/profile
 const googleLogin = catchAsync((req: Request, res: Response) => {
-    const redirectPath = req.query.redirect || "/dashboard";
+    const redirectPath = getSafeRedirectPath(req.query.redirect as string | undefined);
 
-    const encodedRedirectPath = encodeURIComponent(redirectPath as string);
+    const encodedRedirectPath = encodeURIComponent(redirectPath);
 
     const callbackURL = `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success?redirect=${encodedRedirectPath}`;
 
-    res.render("googleRedirect", {
-        callbackURL : callbackURL,
-        betterAuthUrl : envVars.BETTER_AUTH_URL,
-    })
+    res.type("html").send(getGoogleRedirectHtml(envVars.BETTER_AUTH_URL, callbackURL));
 })
 
 const googleLoginSuccess = catchAsync(async (req: Request, res: Response) => {
-    const redirectPath = req.query.redirect as string || "/dashboard";
+    const redirectPath = getSafeRedirectPath(req.query.redirect as string | undefined);
 
     const sessionToken = req.cookies["better-auth.session_token"];
 
@@ -297,11 +387,13 @@ const googleLoginSuccess = catchAsync(async (req: Request, res: Response) => {
 
     tokenUtils.setAccessTokenCookie(res, accessToken);
     tokenUtils.setRefreshTokenCookie(res, refreshToken);
- // ?redirect=//profile -> /profile
-    const isValidRedirectPath = redirectPath.startsWith("/") && !redirectPath.startsWith("//");
-    const finalRedirectPath = isValidRedirectPath ? redirectPath : "/dashboard";
 
-    res.redirect(`${envVars.FRONTEND_URL}${finalRedirectPath}`);
+    const hash = new URLSearchParams({
+        accessToken,
+        redirect: redirectPath
+    });
+
+    res.redirect(`${envVars.FRONTEND_URL}/auth/google/callback#${hash.toString()}`);
 })
 
 const handleOAuthError = catchAsync((req: Request, res: Response) => {
