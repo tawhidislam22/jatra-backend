@@ -2,18 +2,19 @@
 import { toNodeHandler } from "better-auth/node";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import express, { Application, Request, Response } from "express";
+import express from "express";
 // import cron from "node-cron";
 import path from "path";
 import qs from "qs";
 import { envVars } from "./app/config/env";
+import { AppRequest, AppResponse } from "./app/interfaces/http.interface";
 import { auth } from "./app/lib/auth";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
 import { IndexRoutes } from "./app/routes";
 import { PaymentController } from "./app/module/payment/payment.controller";
 
-const app: Application = express();
+const app = express() as any;
 app.set("query parser", (str : string) => qs.parse(str));
 
 app.set("view engine", "ejs");
@@ -41,7 +42,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1", IndexRoutes);
 
 // Basic route
-app.get('/', async (req: Request, res: Response) => {
+app.get('/', async (req: AppRequest, res: AppResponse) => {
     res.status(201).json({
         success: true,
         message: 'API is working',
