@@ -7,11 +7,12 @@ const setCookie = (res: AppResponse, key: string, value: string, options: Cookie
 }
 
 const getCookie = (req: AppRequest, key: string) => {
-    return req.cookies[key];
+    return req.cookies[key] || req.cookies[`__Secure-${key}`];
 }
 
 const clearCookie = (res: AppResponse, key: string, options: CookieOptions) => {
     res.clearCookie(key, options);
+    res.clearCookie(`__Secure-${key}`, options);
 }
 
 export const CookieUtils = {

@@ -162,7 +162,7 @@ export const auth = betterAuth({
                     path: "/",
                 }
             },
-            sessionToken:{
+            session_token:{
                 attributes:{
                     sameSite: envVars.NODE_ENV === "production" ? "none" : "lax",
                     secure: envVars.NODE_ENV === "production",
