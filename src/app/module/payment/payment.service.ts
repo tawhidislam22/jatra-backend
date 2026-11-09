@@ -100,10 +100,56 @@ const fulfillCheckoutSession = async (sessionId: string) => {
     if (payment) {
         // Update Rental Booking if applicable
         if (payment.rentalBookingId) {
-            await prisma.rentalBooking.update({
+            const updatedRental = await prisma.rentalBooking.update({
                 where: { id: payment.rentalBookingId },
-                data: { status: 'ACCEPTED' as any }
+                data: { status: 'ACCEPTED' as any },
+                include: {
+                    vehicle: { include: { center: true } },
+                    customer: true
+                }
             });
+
+            if (updatedRental) {
+                try {
+                    const { RentalBookingEmailService } = await import("../rentalBooking/rentalBookingEmail.service.js");
+                    const { NotificationService } = await import("../notification/notification.service.js");
+
+                    const vehicleTitle = `${updatedRental.vehicle.make} ${updatedRental.vehicle.model}`;
+                    const pickupStr = new Date(updatedRental.pickupDate).toLocaleDateString();
+                    const returnStr = new Date(updatedRental.returnDate).toLocaleDateString();
+
+                    // Customer in-app notification
+                    await NotificationService.createNotification({
+                        userId: updatedRental.customerId,
+                        title: "Rental Booking Confirmed",
+                        message: `Payment successful! Your rental for ${vehicleTitle} (${pickupStr} - ${returnStr}) is confirmed.`,
+                        type: "BOOKING",
+                        link: "/dashboard/bookings"
+                    });
+
+                    // Owner in-app notification
+                    const ownerId = updatedRental.vehicle.center?.adminId;
+                    if (ownerId) {
+                        await NotificationService.createNotification({
+                            userId: ownerId,
+                            title: "New Confirmed Rental Booking",
+                            message: `${updatedRental.customer.fullName || updatedRental.customer.name} paid $${updatedRental.totalAmount} for ${vehicleTitle} (${pickupStr} - ${returnStr}).`,
+                            type: "BOOKING",
+                            link: "/owner/dashboard/bookings"
+                        });
+                    }
+
+                    // Email confirmation to customer
+                    await RentalBookingEmailService.sendBookingConfirmation(
+                        updatedRental,
+                        updatedRental.customer,
+                        updatedRental.vehicle,
+                        updatedRental.vehicle.center
+                    );
+                } catch (rentalErr) {
+                    console.error("Failed to send rental confirmation notifications/email:", rentalErr);
+                }
+            }
         }
         // Update Service Request if applicable
         if (payment.serviceRequestId) {

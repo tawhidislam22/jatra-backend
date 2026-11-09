@@ -69,6 +69,13 @@ router.patch(
     ServiceRequestController.reopenForRework
 );
 
+// Cancel service booking and process refund to wallet
+router.post(
+    '/:id/cancel',
+    checkAuth(Role.CUSTOMER, Role.OWNER, Role.ADMIN),
+    ServiceRequestController.cancelRequest
+);
+
 // General status update
 router.patch(
     '/:id/status', 

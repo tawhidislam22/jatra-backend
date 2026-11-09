@@ -42,11 +42,38 @@ const registerVehicle = async (user: any, payload: IRegisterVehicleRequest) => {
 };
 
 import { QueryBuilder } from "../../utils/QueryBuilder.js";
+import { RequestStatus } from "../../constants/prismaEnums.js";
 
 const getAllVehicles = async (query: any) => {
-    const vehicleQuery = new QueryBuilder(prisma.vehicle as any, query, {
+    const cleanQuery = { ...query };
+
+    // Support real-time date availability filtering
+    if (query.pickupDate && query.returnDate) {
+        const pDate = new Date(query.pickupDate);
+        const rDate = new Date(query.returnDate);
+
+        if (!isNaN(pDate.getTime()) && !isNaN(rDate.getTime()) && pDate < rDate) {
+            const conflicting = await prisma.rentalBooking.findMany({
+                where: {
+                    status: { in: [RequestStatus.ACCEPTED, RequestStatus.IN_PROGRESS, RequestStatus.PENDING] },
+                    pickupDate: { lt: rDate },
+                    returnDate: { gt: pDate }
+                },
+                select: { vehicleId: true }
+            });
+
+            const excludedIds = conflicting.map((c) => c.vehicleId);
+            if (excludedIds.length > 0) {
+                cleanQuery['id[nin]'] = excludedIds;
+            }
+        }
+        delete cleanQuery.pickupDate;
+        delete cleanQuery.returnDate;
+    }
+
+    const vehicleQuery = new QueryBuilder(prisma.vehicle as any, cleanQuery, {
         searchableFields: ['make', 'model', 'licensePlate'],
-        filterableFields: ['type', 'centerId', 'pricePerDay', 'year']
+        filterableFields: ['type', 'centerId', 'pricePerDay', 'year', 'isAvailable']
     })
         .search()
         .filter()

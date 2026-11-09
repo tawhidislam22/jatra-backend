@@ -26,6 +26,18 @@ const getBookings = catchAsync(async (req: AppRequest, res: AppResponse) => {
     });
 });
 
+const getVehicleAvailability = catchAsync(async (req: AppRequest, res: AppResponse) => {
+    const { vehicleId } = req.params;
+    const result = await RentalBookingService.getVehicleAvailability(vehicleId);
+
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: "Vehicle availability fetched successfully",
+        data: result
+    });
+});
+
 const updateBookingStatus = catchAsync(async (req: AppRequest, res: AppResponse) => {
     const { id } = req.params;
     const result = await RentalBookingService.updateBookingStatus(id, req.user.userId, req.body);
@@ -38,8 +50,22 @@ const updateBookingStatus = catchAsync(async (req: AppRequest, res: AppResponse)
     });
 });
 
+const cancelBooking = catchAsync(async (req: AppRequest, res: AppResponse) => {
+    const { id } = req.params;
+    const result = await RentalBookingService.cancelBooking(id, req.user, req.body);
+
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: "Rental booking cancelled and refund processed successfully",
+        data: result
+    });
+});
+
 export const RentalBookingController = {
     createBooking,
     getBookings,
-    updateBookingStatus
+    getVehicleAvailability,
+    updateBookingStatus,
+    cancelBooking
 };

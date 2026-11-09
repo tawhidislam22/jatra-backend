@@ -1,18 +1,26 @@
 model RentalBooking {
-  id          String        @id @default(uuid())
-  pickupDate  DateTime
-  returnDate  DateTime
-  status      RequestStatus @default(PENDING)
-  totalAmount Float
+  id                 String        @id @default(uuid())
+  pickupDate         DateTime
+  returnDate         DateTime
+  status             RequestStatus @default(PENDING)
+  totalAmount        Float
+  dailyPriceSnapshot Float?        // Locked-in daily rate at booking time
+  cancellationFee    Float?
+  refundAmount       Float?
+  cancelledAt        DateTime?
+  cancellationReason String?
 
   // Relations
-  customerId String
-  customer   User     @relation(fields: [customerId], references: [id])
-  vehicleId  String
-  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
-  payment    Payment?
-  review     Review?
-  conversations Conversation[]
+  customerId         String
+  customer           User               @relation(fields: [customerId], references: [id])
+  vehicleId          String
+  vehicle            Vehicle            @relation(fields: [vehicleId], references: [id])
+  payment            Payment?
+  review             Review?
+  conversations      Conversation[]
+  cancellationRecord CancellationRecord?
+  walletTransactions WalletTransaction[]
+  emailLogs          EmailLog[]
 
   @@index([customerId])
   @@index([vehicleId])

@@ -1,0 +1,19 @@
+model CancellationRecord {
+  id               String          @id @default(uuid())
+  userId           String          // Who initiated the cancellation
+  user             User            @relation("UserCancellations", fields: [userId], references: [id])
+  rentalBookingId  String?         @unique
+  rentalBooking    RentalBooking?  @relation(fields: [rentalBookingId], references: [id], onDelete: SetNull)
+  serviceRequestId String?         @unique
+  serviceRequest   ServiceRequest? @relation(fields: [serviceRequestId], references: [id], onDelete: SetNull)
+  originalAmount   Float
+  feePercentage    Float
+  cancellationFee  Float
+  refundAmount     Float
+  refundedToWallet Boolean         @default(true)
+  reason           String?
+  cancelledAt      DateTime        @default(now())
+
+  @@index([userId])
+  @@index([cancelledAt])
+}

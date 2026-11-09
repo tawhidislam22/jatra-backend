@@ -139,6 +139,19 @@ const updateStatus = catchAsync(async (req: AppRequest, res: AppResponse) => {
     });
 });
 
+const cancelRequest = catchAsync(async (req: AppRequest, res: AppResponse) => {
+    const { id } = req.params;
+    const { CancellationService } = await import("../cancellation/cancellation.service.js");
+    const result = await CancellationService.cancelServiceRequest(id, req.user, req.body?.reason);
+
+    sendResponse(res, {
+        httpStatusCode: status.OK,
+        success: true,
+        message: "Service request cancelled and refund processed successfully",
+        data: result
+    });
+});
+
 export const ServiceRequestController = {
     getCenterAvailability,
     createRequest,
@@ -148,5 +161,6 @@ export const ServiceRequestController = {
     submitCompletion,
     verifyCompletion,
     reopenForRework,
-    updateStatus
+    updateStatus,
+    cancelRequest
 };

@@ -1,0 +1,35 @@
+model Wallet {
+  id           String              @id @default(uuid())
+  userId       String              @unique
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance      Float               @default(0)
+  currency     String              @default("USD")
+  transactions WalletTransaction[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@index([userId])
+}
+
+model WalletTransaction {
+  id               String                  @id @default(uuid())
+  walletId         String
+  wallet           Wallet                  @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  amount           Float
+  type             WalletTransactionType
+  reason           WalletTransactionReason
+  description      String
+  cancellationFee  Float?                  @default(0)
+  refundAmount     Float?                  @default(0)
+  referenceId      String?
+  rentalBookingId  String?
+  rentalBooking    RentalBooking?          @relation(fields: [rentalBookingId], references: [id], onDelete: SetNull)
+  serviceRequestId String?
+  serviceRequest   ServiceRequest?         @relation(fields: [serviceRequestId], references: [id], onDelete: SetNull)
+  createdAt        DateTime                @default(now())
+
+  @@index([walletId])
+  @@index([rentalBookingId])
+  @@index([serviceRequestId])
+  @@index([createdAt])
+}

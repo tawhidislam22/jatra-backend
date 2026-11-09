@@ -49,3 +49,18 @@ export const PaymentStatus = {
 } as const;
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];
+
+export const WalletTransactionType = {
+    CREDIT: "CREDIT",
+    DEBIT: "DEBIT",
+} as const;
+
+export type WalletTransactionType = (typeof WalletTransactionType)[keyof typeof WalletTransactionType];
+
+export const WalletTransactionReason = {
+    REFUND: "REFUND",
+    PAYMENT: "PAYMENT",
+    DEPOSIT: "DEPOSIT",
+} as const;
+
+export type WalletTransactionReason = (typeof WalletTransactionReason)[keyof typeof WalletTransactionReason];

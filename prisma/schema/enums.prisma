@@ -37,3 +37,14 @@ enum PaymentStatus {
   SUCCESS
   FAILED
 }
+
+enum WalletTransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum WalletTransactionReason {
+  REFUND
+  PAYMENT
+  DEPOSIT
+}

@@ -8,9 +8,12 @@ model EmailLog {
   dedupKey         String?         @unique
   serviceRequestId String?
   serviceRequest   ServiceRequest? @relation(fields: [serviceRequestId], references: [id], onDelete: SetNull)
+  rentalBookingId  String?
+  rentalBooking    RentalBooking?  @relation(fields: [rentalBookingId], references: [id], onDelete: SetNull)
   createdAt        DateTime        @default(now())
 
   @@index([recipient])
   @@index([serviceRequestId])
+  @@index([rentalBookingId])
   @@index([createdAt])
 }

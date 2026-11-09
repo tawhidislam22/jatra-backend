@@ -7,6 +7,12 @@ import { RentalBookingController } from "./rentalBooking.controller.js";
 
 const router = Router();
 
+// Get vehicle availability (publicly accessible)
+router.get(
+    '/vehicle/:vehicleId/availability',
+    RentalBookingController.getVehicleAvailability
+);
+
 // Create a rental booking (Customer only)
 router.post(
     '/', 
@@ -20,6 +26,14 @@ router.get(
     '/', 
     checkAuth(Role.CUSTOMER, Role.OWNER, Role.ADMIN), 
     RentalBookingController.getBookings
+);
+
+// Cancel booking and process wallet refund
+router.post(
+    '/:id/cancel',
+    checkAuth(Role.CUSTOMER, Role.OWNER, Role.ADMIN),
+    validateRequest(RentalBookingValidation.cancelBooking),
+    RentalBookingController.cancelBooking
 );
 
 // Update booking status (Admin/Owner)

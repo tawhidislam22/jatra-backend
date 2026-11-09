@@ -25,6 +25,8 @@ model User {
   assignedServices    ServiceRequest[]      @relation("MechanicServices")
   payments            Payment[]
   reviews             Review[]
+  wallet              Wallet?
+  cancellations       CancellationRecord[]  @relation("UserCancellations")
 
   // Center Management & Employment
   managedCenters AutomotiveCenter[] @relation("CenterAdmin")

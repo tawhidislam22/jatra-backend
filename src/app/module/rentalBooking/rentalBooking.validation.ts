@@ -7,12 +7,17 @@ export const RentalBookingValidation = {
             vehicleId: z.string().min(1, "Vehicle ID is required"),
             pickupDate: z.string().min(1, "Pickup date is required").transform(str => new Date(str)),
             returnDate: z.string().min(1, "Return date is required").transform(str => new Date(str)),
-            totalAmount: z.number(),
+            totalAmount: z.number().optional(),
         })
     }),
     updateBookingStatus: z.object({
         body: z.object({
             status: z.nativeEnum(RequestStatus)
+        })
+    }),
+    cancelBooking: z.object({
+        body: z.object({
+            reason: z.string().optional()
         })
     })
 };
