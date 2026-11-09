@@ -1,9 +1,7 @@
-
 import { toNodeHandler } from "better-auth/node";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
-// import cron from "node-cron";
 import path from "path";
 import qs from "qs";
 import { envVars } from "./app/config/env.js";
@@ -18,25 +16,53 @@ const app = express() as any;
 app.set("query parser", (str : string) => qs.parse(str));
 
 app.set("view engine", "ejs");
-app.set("views",path.resolve(process.cwd(), `src/app/templates`) )
+app.set("views", path.resolve(process.cwd(), `src/app/templates`));
 
-app.post("/webhook", express.raw({ type: "application/json" }), PaymentController.handleStripeWebhookEvent)
+app.post("/webhook", express.raw({ type: "application/json" }), PaymentController.handleStripeWebhookEvent);
 
-app.use(cors({
-    origin : [envVars.FRONTEND_URL, envVars.BETTER_AUTH_URL],
-    credentials : true,
-    methods : ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders : ["Content-Type", "Authorization"]
-}))
+const allowedOrigins = [
+    envVars.FRONTEND_URL,
+    envVars.BETTER_AUTH_URL,
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+    "https://jatra-frontend.vercel.app",
+    "https://jatra-backend.vercel.app"
+].filter(Boolean);
 
-app.all(["/api/auth", "/api/auth/*path"], toNodeHandler(auth))
+const corsOptions: cors.CorsOptions = {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+        // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+
+        // Allow localhost and 127.0.0.1 on any port
+        if (/^http:\/\/localhost(:\d+)?$/.test(origin) || /^http:\/\/127\.0\.0\.1(:\d+)?$/.test(origin)) {
+            return callback(null, true);
+        }
+
+        // Allow any Vercel domain or configured origins
+        if (origin.endsWith('.vercel.app') || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(null, true);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
+};
+
+app.use(cors(corsOptions));
+
+app.all(["/api/auth", "/api/auth/*path"], toNodeHandler(auth));
 
 // Enable URL-encoded form data parsing
 app.use(express.urlencoded({ extended: true }));
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1", IndexRoutes);
@@ -46,11 +72,10 @@ app.get('/', async (req: AppRequest, res: AppResponse) => {
     res.status(201).json({
         success: true,
         message: 'API is working',
-    })
+    });
 });
 
-app.use(globalErrorHandler)
-app.use(notFound)
-
+app.use(globalErrorHandler);
+app.use(notFound);
 
 export default app;

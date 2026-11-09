@@ -145,6 +145,36 @@ const createRequest = async (userId: string, payload: ICreateServiceRequest, pro
         }
     }
 
+    // 2.1 Prevent multiple active service bookings for the same car at a time
+    const activeBookingForCar = await prisma.serviceRequest.findFirst({
+        where: {
+            vehicleId: payload.vehicleId,
+            status: {
+                in: [
+                    RequestStatus.PENDING,
+                    RequestStatus.ACCEPTED,
+                    RequestStatus.IN_PROGRESS,
+                    RequestStatus.COMPLETED_PENDING_REVIEW,
+                    RequestStatus.REASSIGNMENT_REQUIRED
+                ]
+            }
+        },
+        include: {
+            center: { select: { name: true } },
+            payment: { select: { status: true } }
+        }
+    });
+
+    if (activeBookingForCar) {
+        const isFailedPending = activeBookingForCar.status === RequestStatus.PENDING && activeBookingForCar.payment?.status === PaymentStatus.FAILED;
+        if (!isFailedPending) {
+            throw new AppError(
+                status.CONFLICT,
+                `This car already has an ongoing service booking in progress (${activeBookingForCar.serviceName || 'Car Service'} - Status: ${activeBookingForCar.status.replace(/_/g, ' ')}${activeBookingForCar.center?.name ? ` at ${activeBookingForCar.center.name}` : ''}). You cannot create multiple service bookings for the same vehicle simultaneously.`
+            );
+        }
+    }
+
     // 3. Resolve Service Package & Price
     const catalogService = getServiceByNameOrId(payload.serviceName || "");
     const serviceName = catalogService?.name || payload.serviceName || "Workshop Car Service";
